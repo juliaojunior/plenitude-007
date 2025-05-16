@@ -38,16 +38,29 @@ if (
   // dependendo de como sua aplicação deve se comportar sem o Firebase.
 }
 
-// Inicializa o app Firebase (ou obtém a instância já existente)
-const app = getApps().length === 0
-  ? initializeApp(firebaseConfig)
-  : getApp();
+// Inicializa o Firebase
+// Verifica se já existe uma instância do Firebase para evitar reinicializações
+let app;
+if (!getApps().length) {
+  try {
+    app = initializeApp(firebaseConfig);
+  } catch (error) {
+    console.error("Falha ao inicializar o Firebase App:", error);
+    // Lidar com o erro de inicialização, talvez mostrando uma mensagem ao usuário
+  }
+} else {
+  app = getApp();
+}
 
-// Instâncias de Auth e Firestore garantidas sem null
-const auth = getAuth(app);
-const db = getFirestore(app);
+// Obtém a instância de autenticação do Firebase
+// e a instância do Firestore (banco de dados NoSQL do Firebase)
+// Somente se o app foi inicializado com sucesso
+const auth = app ? getAuth(app) : null;
+const db = app ? getFirestore(app) : null;
 
-// Provedor Google para autenticação
+// Cria um provedor de autenticação do Google
 const googleProvider = new GoogleAuthProvider();
 
+// Exporta as instâncias para serem usadas em outras partes da aplicação
 export { app, auth, db, googleProvider };
+
