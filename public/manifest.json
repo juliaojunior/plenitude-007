@@ -1,0 +1,38 @@
+{
+  "theme_color": "#3b0764", // Cor roxa escura para a barra de título do PWA
+  "background_color": "#111827", // Cor de fundo (cinza escuro, similar ao bg-gray-900)
+  "display": "standalone", // Define que o PWA deve abrir em sua própria janela
+  "scope": "/", // Define o escopo de navegação do PWA
+  "start_url": "/", // URL inicial ao abrir o PWA
+  "name": "PLENITUDE PWA", // Nome completo da aplicação
+  "short_name": "Plenitude", // Nome curto da aplicação (usado no ícone da home screen)
+  "description": "Um PWA para promover o bem-estar e a plenitude.", // Descrição da aplicação
+  "lang": "pt-BR", // Idioma principal da aplicação
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-256x256.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
+
