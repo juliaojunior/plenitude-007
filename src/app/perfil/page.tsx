@@ -1,24 +1,38 @@
 "use client";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import Navbar from "@/components/Navbar";
-import { useAuth } from "@/contexts/AuthContext";
-import Image from "next/image";
-import { useState, useEffect } from "react";
-import { Edit3, X, Check, User, Award, Trophy, Star, Clock, Calendar, Zap } from "lucide-react";
-import { updateProfile } from "firebase/auth";
-import { doc, updateDoc, setDoc, getDoc, collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
+import ProtectedRoute from "@/components/ProtectedRoute"; // Componente para proteger a rota
+import Navbar from "@/components/Navbar"; // Componente da barra de navegação
+import { useAuth } from "@/contexts/AuthContext"; // Hook para acessar informações do usuário
+import Image from "next/image"; // Componente para otimização de imagens
+import { useState, useEffect, ReactNode } from "react";
+import { Edit3, X, Bell, Settings } from "lucide-react"; // Ícones para edição, fechar popup, notificações e configurações
+import Link from "next/link"; // Componente para navegação entre páginas
+import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
-// Ícone para a seção Jornada
+// Interface para os dados da jornada do usuário
+interface JornadaData {
+  diasConsecutivos: number;
+  meditacoesMes: number;
+  meditacoesAno: number;
+  totalMeditacoes: number;
+  minutosMeditados: number;
+}
+
+// Interface para as conquistas
+interface Conquista {
+  id: string;
+  titulo: string;
+  descricao: string;
+  icone: ReactNode;
+  criterio: (jornada: JornadaData) => boolean;
+  nivel: string;
+}
+
+// --- Ícone para a seção Jornada (Exemplo) ---
 const IconJornada = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
   </svg>
-);
-
-// Ícone para a seção Conquistas
-const IconConquistas = () => (
-  <Trophy className="h-6 w-6 mr-2 text-yellow-400" />
 );
 
 // Lista de ícones de perfil disponíveis
@@ -31,129 +45,27 @@ const profileIcons = [
   "/profile-icons/icon_abstract_lines.png",
 ];
 
-// Interface para os dados da jornada do usuário
-interface JornadaData {
-  diasConsecutivos: number;
-  meditacoesMes: number;
-  meditacoesAno: number;
-  meditacoesTotal: number;
-  minutosTotal: number;
-}
-
-// Dados padrão para a jornada do usuário (usados apenas enquanto carrega)
-const jornadaDataPadrao: JornadaData = {
-  diasConsecutivos: 0,
-  meditacoesMes: 0,
-  meditacoesAno: 0,
-  meditacoesTotal: 0,
-  minutosTotal: 0,
-};
-
-// Definição das conquistas disponíveis
-const conquistasDefinicoes = [
-  {
-    id: "primeiros_passos",
-    titulo: "Primeiros Passos",
-    descricao: "Complete sua primeira meditação",
-    icone: <Zap className="h-8 w-8 text-yellow-400" />,
-    criterio: (jornada: JornadaData) => jornada.meditacoesTotal >= 1,
-    nivel: "bronze"
-  },
-  {
-    id: "habito_semanal",
-    titulo: "Hábito Semanal",
-    descricao: "Complete 7 meditações",
-    icone: <Calendar className="h-8 w-8 text-yellow-400" />,
-    criterio: (jornada: JornadaData) => jornada.meditacoesTotal >= 7,
-    nivel: "bronze"
-  },
-  {
-    id: "consistencia",
-    titulo: "Consistência",
-    descricao: "Medite por 3 dias consecutivos",
-    icone: <Clock className="h-8 w-8 text-yellow-400" />,
-    criterio: (jornada: JornadaData) => jornada.diasConsecutivos >= 3,
-    nivel: "bronze"
-  },
-  {
-    id: "dedicacao",
-    titulo: "Dedicação",
-    descricao: "Acumule 60 minutos de meditação",
-    icone: <Star className="h-8 w-8 text-yellow-400" />,
-    criterio: (jornada: JornadaData) => jornada.minutosTotal >= 60,
-    nivel: "bronze"
-  },
-  {
-    id: "praticante_regular",
-    titulo: "Praticante Regular",
-    descricao: "Complete 30 meditações",
-    icone: <Award className="h-8 w-8 text-blue-400" />,
-    criterio: (jornada: JornadaData) => jornada.meditacoesTotal >= 30,
-    nivel: "prata"
-  },
-  {
-    id: "rotina_diaria",
-    titulo: "Rotina Diária",
-    descricao: "Medite por 7 dias consecutivos",
-    icone: <Calendar className="h-8 w-8 text-blue-400" />,
-    criterio: (jornada: JornadaData) => jornada.diasConsecutivos >= 7,
-    nivel: "prata"
-  },
-  {
-    id: "hora_zen",
-    titulo: "Hora Zen",
-    descricao: "Acumule 300 minutos de meditação",
-    icone: <Clock className="h-8 w-8 text-blue-400" />,
-    criterio: (jornada: JornadaData) => jornada.minutosTotal >= 300,
-    nivel: "prata"
-  },
-  {
-    id: "mestre_meditacao",
-    titulo: "Mestre da Meditação",
-    descricao: "Complete 100 meditações",
-    icone: <Trophy className="h-8 w-8 text-purple-400" />,
-    criterio: (jornada: JornadaData) => jornada.meditacoesTotal >= 100,
-    nivel: "ouro"
-  },
-  {
-    id: "compromisso_diario",
-    titulo: "Compromisso Diário",
-    descricao: "Medite por 30 dias consecutivos",
-    icone: <Calendar className="h-8 w-8 text-purple-400" />,
-    criterio: (jornada: JornadaData) => jornada.diasConsecutivos >= 30,
-    nivel: "ouro"
-  },
-  {
-    id: "jornada_iluminada",
-    titulo: "Jornada Iluminada",
-    descricao: "Acumule 1000 minutos de meditação",
-    icone: <Star className="h-8 w-8 text-purple-400" />,
-    criterio: (jornada: JornadaData) => jornada.minutosTotal >= 1000,
-    nivel: "ouro"
-  }
-];
-
-// Componente de Conteúdo da Página de Perfil
+// --- Componente de Conteúdo da Página de Perfil ---
 function ProfilePageContent() {
-  const { user } = useAuth();
+  const { user, updateUserProfile } = useAuth(); // Obtém o usuário logado do contexto de autenticação
   const [showIconPopup, setShowIconPopup] = useState(false);
-  const [selectedIcon, setSelectedIcon] = useState("/user-placeholder.svg");
-  
-  // Estados para edição de nome
-  const [showNameEdit, setShowNameEdit] = useState(false);
-  const [newDisplayName, setNewDisplayName] = useState("");
-  const [isUpdatingName, setIsUpdatingName] = useState(false);
-  const [nameUpdateError, setNameUpdateError] = useState("");
-  
-  // Estado para conquistas
-  const [conquistasDesbloqueadas, setConquistasDesbloqueadas] = useState([]);
-  const [proximasConquistas, setProximasConquistas] = useState([]);
-  const [showConquistaDetalhes, setShowConquistaDetalhes] = useState(null);
-  
-  // Estado para dados da jornada
-  const [jornadaData, setJornadaData] = useState<JornadaData>(jornadaDataPadrao);
+  const [selectedIcon, setSelectedIcon] = useState("/user-placeholder.svg"); // Ícone padrão
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [jornada, setJornada] = useState<JornadaData>({
+    diasConsecutivos: 0,
+    meditacoesMes: 0,
+    meditacoesAno: 0,
+    totalMeditacoes: 0,
+    minutosMeditados: 0
+  });
   const [carregandoJornada, setCarregandoJornada] = useState(true);
-  const [erroJornada, setErroJornada] = useState("");
+  const [conquistasDesbloqueadas, setConquistasDesbloqueadas] = useState<Conquista[]>([]);
+  const [proximasConquistas, setProximasConquistas] = useState<Conquista[]>([]);
+  const [conquistaSelecionada, setConquistaSelecionada] = useState<Conquista | null>(null);
 
   // Efeito para carregar o ícone salvo do localStorage ao montar o componente
   useEffect(() => {
@@ -162,353 +74,387 @@ function ProfilePageContent() {
       setSelectedIcon(savedIcon);
     }
     
-    // Inicializa o campo de nome com o nome atual do usuário
-    if (user?.displayName) {
-      setNewDisplayName(user.displayName);
-    }
-    
-    // Carrega os dados da jornada do usuário
     if (user) {
+      setNewName(user.displayName || "");
       carregarDadosJornada();
     }
   }, [user]);
-  
-  // Efeito para calcular conquistas quando os dados da jornada são atualizados
-  useEffect(() => {
-    if (!carregandoJornada) {
-      calcularConquistas();
-    }
-  }, [jornadaData, carregandoJornada]);
 
-  // Função para carregar os dados da jornada do usuário do Firestore
+  // Função para lidar com a seleção de um novo ícone
+  const handleIconSelect = (iconPath: string) => {
+    setSelectedIcon(iconPath);
+    localStorage.setItem("userProfileIcon", iconPath); // Salva no localStorage
+    setShowIconPopup(false); // Fecha o popup
+  };
+
+  // Função para iniciar a edição do nome
+  const handleStartEditName = () => {
+    setIsEditingName(true);
+    setNewName(user?.displayName || "");
+    setSaveError("");
+    setSaveSuccess(false);
+  };
+
+  // Função para cancelar a edição do nome
+  const handleCancelEditName = () => {
+    setIsEditingName(false);
+    setSaveError("");
+  };
+
+  // Função para salvar o novo nome
+  const handleSaveName = async () => {
+    if (!user) return;
+    
+    setIsSaving(true);
+    setSaveError("");
+    setSaveSuccess(false);
+    
+    try {
+      // Atualiza o nome no Firebase Authentication
+      await updateUserProfile({ displayName: newName });
+      
+      // Atualiza ou cria o documento do usuário no Firestore
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      
+      if (userDocSnap.exists()) {
+        // Se o documento existe, atualiza o displayName
+        await updateDoc(userDocRef, {
+          displayName: newName
+        });
+      } else {
+        // Se o documento não existe, cria um novo
+        await setDoc(userDocRef, {
+          displayName: newName,
+          email: user.email,
+          role: "user",
+          createdAt: new Date().toISOString()
+        });
+      }
+      
+      setIsEditingName(false);
+      setSaveSuccess(true);
+      
+      // Limpa a mensagem de sucesso após 3 segundos
+      setTimeout(() => {
+        setSaveSuccess(false);
+      }, 3000);
+      
+    } catch (error) {
+      console.error("Erro ao atualizar nome:", error);
+      setSaveError("Não foi possível atualizar o nome. Tente novamente.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Função para carregar os dados da jornada do usuário
   const carregarDadosJornada = async () => {
     if (!user) return;
     
     setCarregandoJornada(true);
-    setErroJornada("");
     
     try {
-      // Busca o documento do usuário
       const userDocRef = doc(db, "users", user.uid);
       const userDocSnap = await getDoc(userDocRef);
       
-      // Verifica se o documento existe e tem dados de jornada
-      if (userDocSnap.exists()) {
-        const userData = userDocSnap.data();
-        
-        // Se já existem dados de jornada no documento do usuário
-        if (userData.jornada) {
-          setJornadaData(userData.jornada);
-        } else {
-          // Se não existem dados de jornada, calcula a partir do histórico
-          await calcularDadosJornadaDoHistorico();
-        }
+      if (userDocSnap.exists() && userDocSnap.data().jornada) {
+        // Se já existem dados de jornada, usa eles
+        setJornada(userDocSnap.data().jornada);
       } else {
-        // Se o documento do usuário não existe, calcula a partir do histórico
-        await calcularDadosJornadaDoHistorico();
+        // Se não existem, calcula com base no histórico ou usa valores padrão
+        // Aqui você pode implementar a lógica para calcular com base no histórico
+        // Por enquanto, usamos valores padrão
+        const jornadaPadrao = {
+          diasConsecutivos: 0,
+          meditacoesMes: 0,
+          meditacoesAno: 0,
+          totalMeditacoes: 0,
+          minutosMeditados: 0
+        };
+        
+        setJornada(jornadaPadrao);
+        
+        // Opcionalmente, salva esses valores padrão no Firestore
+        if (userDocSnap.exists()) {
+          await updateDoc(userDocRef, {
+            jornada: jornadaPadrao
+          });
+        }
       }
     } catch (error) {
       console.error("Erro ao carregar dados da jornada:", error);
-      setErroJornada("Não foi possível carregar os dados da sua jornada.");
-      // Em caso de erro, mantém os dados padrão
     } finally {
       setCarregandoJornada(false);
-    }
-  };
-  
-  // Função para calcular os dados da jornada a partir do histórico de meditações
-  const calcularDadosJornadaDoHistorico = async () => {
-    if (!user) return;
-    
-    try {
-      // Busca o histórico de meditações do usuário
-      const historicoRef = collection(db, "historicoMeditacoes");
-      const q = query(
-        historicoRef,
-        where("userId", "==", user.uid),
-        orderBy("dataOuvida", "desc")
-      );
-      
-      const querySnapshot = await getDocs(q);
-      
-      if (querySnapshot.empty) {
-        // Se não há histórico, mantém os dados padrão
-        return;
-      }
-      
-      // Inicializa os dados da jornada
-      const jornada: JornadaData = {
-        diasConsecutivos: 0,
-        meditacoesMes: 0,
-        meditacoesAno: 0,
-        meditacoesTotal: 0,
-        minutosTotal: 0
-      };
-      
-      // Data atual para cálculos
-      const hoje = new Date();
-      const mesAtual = hoje.getMonth();
-      const anoAtual = hoje.getFullYear();
-      
-      // Conjunto para rastrear dias únicos para cálculo de dias consecutivos
-      const diasUnicos = new Set<string>();
-      
-      // Processa cada entrada do histórico
-      querySnapshot.forEach((doc) => {
-        const meditacao = doc.data();
-        const dataOuvida = meditacao.dataOuvida.toDate ? meditacao.dataOuvida.toDate() : new Date(meditacao.dataOuvida);
-        
-        // Incrementa o total de meditações
-        jornada.meditacoesTotal++;
-        
-        // Adiciona a duração ao total de minutos (se disponível)
-        if (meditacao.duracao) {
-          jornada.minutosTotal += meditacao.duracao;
-        } else if (meditacao.duracaoSegundos) {
-          // Se a duração estiver em segundos, converte para minutos
-          jornada.minutosTotal += Math.round(meditacao.duracaoSegundos / 60);
-        }
-        
-        // Verifica se é do mês atual
-        if (dataOuvida.getMonth() === mesAtual && dataOuvida.getFullYear() === anoAtual) {
-          jornada.meditacoesMes++;
-        }
-        
-        // Verifica se é do ano atual
-        if (dataOuvida.getFullYear() === anoAtual) {
-          jornada.meditacoesAno++;
-        }
-        
-        // Adiciona o dia ao conjunto de dias únicos (formato YYYY-MM-DD)
-        const diaFormatado = `${dataOuvida.getFullYear()}-${String(dataOuvida.getMonth() + 1).padStart(2, '0')}-${String(dataOuvida.getDate()).padStart(2, '0')}`;
-        diasUnicos.add(diaFormatado);
-      });
-      
-      // Calcula dias consecutivos (simplificado - apenas conta dias únicos)
-      // Em uma implementação real, seria necessário verificar se os dias são realmente consecutivos
-      jornada.diasConsecutivos = Math.min(diasUnicos.size, 30); // Limita a 30 para este exemplo
-      
-      // Atualiza o estado com os dados calculados
-      setJornadaData(jornada);
-      
-      // Opcionalmente, salva os dados calculados no documento do usuário para uso futuro
-      try {
-        const userDocRef = doc(db, "users", user.uid);
-        await updateDoc(userDocRef, {
-          jornada: jornada
-        });
-      } catch (error) {
-        console.error("Erro ao salvar dados da jornada no perfil:", error);
-        // Continua mesmo se falhar ao salvar
-      }
-      
-    } catch (error) {
-      console.error("Erro ao calcular dados da jornada:", error);
-      // Em caso de erro, mantém os dados padrão
+      calcularConquistas();
     }
   };
 
+  // Lista de conquistas disponíveis
+  const todasConquistas: Conquista[] = [
+    // Nível Bronze (Iniciante)
+    {
+      id: "primeira-meditacao",
+      titulo: "Primeiro Passo",
+      descricao: "Completou sua primeira meditação",
+      icone: <span className="text-2xl">🌱</span>,
+      criterio: (j) => j.totalMeditacoes >= 1,
+      nivel: "bronze"
+    },
+    {
+      id: "tres-dias",
+      titulo: "Consistência Inicial",
+      descricao: "Meditou por 3 dias consecutivos",
+      icone: <span className="text-2xl">📆</span>,
+      criterio: (j) => j.diasConsecutivos >= 3,
+      nivel: "bronze"
+    },
+    {
+      id: "dez-meditacoes",
+      titulo: "Dedicação Crescente",
+      descricao: "Completou 10 meditações",
+      icone: <span className="text-2xl">🔟</span>,
+      criterio: (j) => j.totalMeditacoes >= 10,
+      nivel: "bronze"
+    },
+    {
+      id: "hora-meditada",
+      titulo: "Uma Hora de Paz",
+      descricao: "Acumulou 60 minutos de meditação",
+      icone: <span className="text-2xl">⏱️</span>,
+      criterio: (j) => j.minutosMeditados >= 60,
+      nivel: "bronze"
+    },
+    
+    // Nível Prata (Intermediário)
+    {
+      id: "sete-dias",
+      titulo: "Uma Semana Zen",
+      descricao: "Meditou por 7 dias consecutivos",
+      icone: <span className="text-2xl">🗓️</span>,
+      criterio: (j) => j.diasConsecutivos >= 7,
+      nivel: "prata"
+    },
+    {
+      id: "trinta-meditacoes",
+      titulo: "Praticante Regular",
+      descricao: "Completou 30 meditações",
+      icone: <span className="text-2xl">🧘</span>,
+      criterio: (j) => j.totalMeditacoes >= 30,
+      nivel: "prata"
+    },
+    {
+      id: "cinco-horas",
+      titulo: "Imersão Profunda",
+      descricao: "Acumulou 5 horas de meditação",
+      icone: <span className="text-2xl">🕔</span>,
+      criterio: (j) => j.minutosMeditados >= 300,
+      nivel: "prata"
+    },
+    
+    // Nível Ouro (Avançado)
+    {
+      id: "trinta-dias",
+      titulo: "Mestre da Constância",
+      descricao: "Meditou por 30 dias consecutivos",
+      icone: <span className="text-2xl">🏆</span>,
+      criterio: (j) => j.diasConsecutivos >= 30,
+      nivel: "ouro"
+    },
+    {
+      id: "cem-meditacoes",
+      titulo: "Centenário da Paz",
+      descricao: "Completou 100 meditações",
+      icone: <span className="text-2xl">💯</span>,
+      criterio: (j) => j.totalMeditacoes >= 100,
+      nivel: "ouro"
+    },
+    {
+      id: "vinte-horas",
+      titulo: "Iluminação Interior",
+      descricao: "Acumulou 20 horas de meditação",
+      icone: <span className="text-2xl">✨</span>,
+      criterio: (j) => j.minutosMeditados >= 1200,
+      nivel: "ouro"
+    }
+  ];
+
   // Função para calcular conquistas desbloqueadas e próximas
   const calcularConquistas = () => {
-    // Filtra conquistas desbloqueadas
-    const desbloqueadas = conquistasDefinicoes.filter(conquista => 
-      conquista.criterio(jornadaData)
+    const desbloqueadas = todasConquistas.filter(conquista => 
+      conquista.criterio(jornada)
     );
     
-    // Filtra próximas conquistas (não desbloqueadas)
-    const proximas = conquistasDefinicoes.filter(conquista => 
-      !conquista.criterio(jornadaData)
+    const proximas = todasConquistas.filter(conquista => 
+      !conquista.criterio(jornada)
     ).slice(0, 3); // Limita a 3 próximas conquistas
     
     setConquistasDesbloqueadas(desbloqueadas);
     setProximasConquistas(proximas);
   };
 
-  // Função para lidar com a seleção de um novo ícone
-  const handleIconSelect = (iconPath) => {
-    setSelectedIcon(iconPath);
-    localStorage.setItem("userProfileIcon", iconPath);
-    setShowIconPopup(false);
-  };
-  
-  // Função para atualizar o nome do usuário
-  const handleUpdateDisplayName = async () => {
-    if (!user || !newDisplayName.trim()) return;
-    
-    setIsUpdatingName(true);
-    setNameUpdateError("");
-    
-    try {
-      // Atualiza o displayName no objeto de autenticação do Firebase
-      await updateProfile(user, { displayName: newDisplayName.trim() });
-      
-      // Verifica se o documento do usuário existe no Firestore
-      const userDocRef = doc(db, "users", user.uid);
-      const userDocSnap = await getDoc(userDocRef);
-      
-      if (userDocSnap.exists()) {
-        // Se o documento existe, atualiza o nome
-        await updateDoc(userDocRef, {
-          displayName: newDisplayName.trim()
-        });
-      } else {
-        // Se o documento não existe, cria um novo com o nome
-        await setDoc(userDocRef, {
-          displayName: newDisplayName.trim(),
-          email: user.email,
-          role: "user", // Define o papel padrão como "user"
-          createdAt: new Date().toISOString(),
-          jornada: jornadaData // Inclui os dados da jornada atual
-        });
-      }
-      
-      // Fecha o modal de edição
-      setShowNameEdit(false);
-    } catch (error) {
-      console.error("Erro ao atualizar nome:", error);
-      setNameUpdateError("Não foi possível atualizar o nome. Tente novamente.");
-    } finally {
-      setIsUpdatingName(false);
-    }
-  };
-  
-  // Função para renderizar a cor de fundo baseada no nível da conquista
-  const getBgColorByLevel = (nivel) => {
-    switch(nivel) {
-      case "bronze": return "from-amber-700 to-yellow-600";
-      case "prata": return "from-slate-400 to-blue-400";
-      case "ouro": return "from-yellow-500 to-amber-300";
-      default: return "from-gray-700 to-gray-600";
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 text-white">
-      <main className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+      <main className="max-w-4xl mx-auto px-4 py-8 pb-24">
         {/* Cabeçalho do Perfil */}
-        <div className="bg-gray-800 bg-opacity-70 p-6 md:p-8 rounded-xl shadow-2xl text-center transform transition-all hover:scale-[1.01] duration-300">
-          <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-8">
-            Meu Perfil
-          </h1>
-          {/* Imagem de Perfil Circular com Botão de Edição */}
-          <div className="relative mx-auto mb-6 w-32 h-32 md:w-40 md:h-40">
-            <div className="rounded-full overflow-hidden border-4 border-blue-500 shadow-lg bg-gray-700 flex items-center justify-center w-full h-full">
-              <Image 
-                src={selectedIcon} 
-                alt="Foto do Perfil" 
-                width={160} 
-                height={160} 
-                className="object-cover w-full h-full"
-                priority
-                key={selectedIcon}
-              />
-            </div>
-            <button
-              onClick={() => setShowIconPopup(true)}
-              className="absolute bottom-0 right-0 bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-full shadow-md transition-transform transform hover:scale-110"
-              aria-label="Editar ícone de perfil"
-            >
-              <Edit3 size={18} />
-            </button>
-          </div>
-          
-          {/* Nome do Usuário com Botão de Edição */}
-          {!showNameEdit && user?.displayName && (
-            <div className="flex items-center justify-center mb-2">
-              <h2 className="text-2xl font-semibold text-gray-100">
-                {user.displayName}
-              </h2>
+        <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-6">
+          Meu Perfil
+        </h1>
+
+        {/* Seção de Informações do Usuário */}
+        <div className="bg-gray-800 bg-opacity-70 rounded-xl p-6 md:p-8 shadow-2xl mb-8">
+          <div className="flex flex-col md:flex-row items-center md:items-start">
+            {/* Foto/Ícone de Perfil */}
+            <div className="relative mb-6 md:mb-0 md:mr-8">
+              <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-700 border-4 border-purple-500 relative">
+                <Image
+                  src={selectedIcon}
+                  alt="Ícone de perfil"
+                  width={128}
+                  height={128}
+                  className="object-cover"
+                />
+              </div>
               <button
-                onClick={() => setShowNameEdit(true)}
-                className="ml-2 text-blue-400 hover:text-blue-300 p-1 rounded-full hover:bg-gray-700 transition-colors"
-                aria-label="Editar nome"
+                onClick={() => setShowIconPopup(true)}
+                className="absolute bottom-0 right-0 bg-purple-600 p-2 rounded-full text-white hover:bg-purple-700 transition-colors"
+                aria-label="Editar foto de perfil"
               >
-                <Edit3 size={16} />
+                <Edit3 size={18} />
               </button>
             </div>
-          )}
-          
-          {/* Formulário de Edição de Nome */}
-          {showNameEdit && (
-            <div className="mb-4 max-w-xs mx-auto">
-              <div className="flex items-center bg-gray-700 rounded-lg overflow-hidden shadow-inner">
-                <User size={18} className="text-gray-400 ml-3" />
-                <input
-                  type="text"
-                  value={newDisplayName}
-                  onChange={(e) => setNewDisplayName(e.target.value)}
-                  className="bg-gray-700 text-white px-3 py-2 w-full focus:outline-none"
-                  placeholder="Seu nome"
-                  disabled={isUpdatingName}
-                />
-                <button
-                  onClick={handleUpdateDisplayName}
-                  disabled={isUpdatingName || !newDisplayName.trim()}
-                  className="bg-blue-600 hover:bg-blue-700 text-white p-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  aria-label="Salvar nome"
-                >
-                  {isUpdatingName ? (
-                    <span className="animate-pulse">...</span>
-                  ) : (
-                    <Check size={18} />
-                  )}
-                </button>
-                <button
-                  onClick={() => {
-                    setShowNameEdit(false);
-                    setNewDisplayName(user?.displayName || "");
-                    setNameUpdateError("");
-                  }}
-                  className="bg-gray-600 hover:bg-gray-700 text-white p-2"
-                  aria-label="Cancelar edição"
-                  disabled={isUpdatingName}
-                >
-                  <X size={18} />
-                </button>
+
+            {/* Informações do Usuário */}
+            <div className="flex-1 text-center md:text-left">
+              {/* Nome do Usuário */}
+              <div className="mb-4">
+                {isEditingName ? (
+                  <div className="flex flex-col space-y-2">
+                    <input
+                      type="text"
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      className="bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      placeholder="Seu nome"
+                      autoFocus
+                    />
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={handleSaveName}
+                        disabled={isSaving}
+                        className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg transition-colors"
+                      >
+                        {isSaving ? "Salvando..." : "Salvar"}
+                      </button>
+                      <button
+                        onClick={handleCancelEditName}
+                        className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                    {saveError && (
+                      <p className="text-red-400 text-sm mt-1">{saveError}</p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center md:justify-start">
+                    <h2 className="text-2xl font-semibold text-white mr-2">
+                      {user?.displayName || "Usuário"}
+                    </h2>
+                    <button
+                      onClick={handleStartEditName}
+                      className="text-gray-400 hover:text-purple-400 transition-colors"
+                      aria-label="Editar nome"
+                    >
+                      <Edit3 size={16} />
+                    </button>
+                  </div>
+                )}
+                {saveSuccess && (
+                  <p className="text-green-400 text-sm mt-1">Nome atualizado com sucesso!</p>
+                )}
               </div>
-              {nameUpdateError && (
-                <p className="text-red-400 text-sm mt-1">{nameUpdateError}</p>
-              )}
+
+              {/* Email do Usuário */}
+              <p className="text-gray-300 mb-4">{user?.email}</p>
+
+              {/* Link para Configurações de Notificação */}
+              <Link 
+                href="/configuracoes/notificacoes" 
+                className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white transition-colors"
+              >
+                <Bell size={16} className="mr-2" />
+                Configurações de Notificação
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Seção de Jornada */}
+        <div className="bg-gray-800 bg-opacity-70 rounded-xl p-6 md:p-8 shadow-2xl mb-8">
+          <div className="flex items-center mb-4">
+            <IconJornada />
+            <h2 className="text-2xl font-semibold text-white">Sua Jornada</h2>
+          </div>
+
+          {carregandoJornada ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-400"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+              <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg text-center">
+                <p className="text-gray-300 text-sm">Dias Consecutivos</p>
+                <p className="text-3xl font-bold text-purple-400">{jornada.diasConsecutivos}</p>
+              </div>
+              <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg text-center">
+                <p className="text-gray-300 text-sm">Meditações este Mês</p>
+                <p className="text-3xl font-bold text-purple-400">{jornada.meditacoesMes}</p>
+              </div>
+              <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg text-center">
+                <p className="text-gray-300 text-sm">Meditações este Ano</p>
+                <p className="text-3xl font-bold text-purple-400">{jornada.meditacoesAno}</p>
+              </div>
+              <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg text-center">
+                <p className="text-gray-300 text-sm">Total de Meditações</p>
+                <p className="text-3xl font-bold text-purple-400">{jornada.totalMeditacoes}</p>
+              </div>
+              <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg text-center col-span-1 md:col-span-2">
+                <p className="text-gray-300 text-sm">Minutos Meditados</p>
+                <p className="text-3xl font-bold text-purple-400">{jornada.minutosMeditados}</p>
+              </div>
             </div>
           )}
-          
-          {/* Email do Usuário */}
-          <p className="text-gray-300 text-md mb-6">
-            {user?.email}
-          </p>
         </div>
-        
-        {/* Seção Conquistas e Medalhas */}
-        <section className="bg-gray-800 bg-opacity-70 p-6 md:p-8 rounded-xl shadow-2xl w-full transform transition-all hover:scale-[1.02] duration-300">
-          <h2 className="text-2xl font-semibold text-gray-100 mb-6 border-b-2 border-yellow-500 pb-3 flex items-center">
-            <IconConquistas />
-            Conquistas e Medalhas
-          </h2>
+
+        {/* Seção de Conquistas */}
+        <div className="bg-gray-800 bg-opacity-70 rounded-xl p-6 md:p-8 shadow-2xl">
+          <h2 className="text-2xl font-semibold text-white mb-6">Conquistas e Medalhas</h2>
           
           {/* Conquistas Desbloqueadas */}
           <div className="mb-8">
-            <h3 className="text-xl font-semibold text-yellow-300 mb-4">Suas Conquistas</h3>
+            <h3 className="text-lg font-medium text-purple-300 mb-4">Conquistas Desbloqueadas</h3>
             
-            {carregandoJornada ? (
-              <div className="flex justify-center items-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-yellow-300"></div>
-                <span className="ml-3 text-gray-300">Carregando conquistas...</span>
-              </div>
-            ) : conquistasDesbloqueadas.length === 0 ? (
-              <p className="text-gray-400 italic">Você ainda não desbloqueou nenhuma conquista. Continue meditando!</p>
+            {conquistasDesbloqueadas.length === 0 ? (
+              <p className="text-gray-400 italic">Continue meditando para desbloquear conquistas!</p>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
                 {conquistasDesbloqueadas.map((conquista) => (
-                  <div 
+                  <button
                     key={conquista.id}
-                    onClick={() => setShowConquistaDetalhes(conquista)}
-                    className={`bg-gradient-to-br ${getBgColorByLevel(conquista.nivel)} p-4 rounded-lg shadow-lg text-center cursor-pointer transform transition-all hover:scale-105 duration-300`}
+                    onClick={() => setConquistaSelecionada(conquista)}
+                    className={`flex flex-col items-center justify-center p-3 rounded-lg transition-transform transform hover:scale-105 ${
+                      conquista.nivel === "bronze" 
+                        ? "bg-amber-700 bg-opacity-40" 
+                        : conquista.nivel === "prata" 
+                        ? "bg-gray-500 bg-opacity-40" 
+                        : "bg-yellow-600 bg-opacity-40"
+                    }`}
                   >
-                    <div className="bg-gray-900 bg-opacity-30 rounded-full p-3 mx-auto mb-2 w-16 h-16 flex items-center justify-center">
-                      {conquista.icone}
-                    </div>
-                    <h4 className="font-semibold text-white">{conquista.titulo}</h4>
-                  </div>
+                    <div className="text-3xl mb-2">{conquista.icone}</div>
+                    <p className="text-xs text-center font-medium">{conquista.titulo}</p>
+                  </button>
                 ))}
               </div>
             )}
@@ -516,145 +462,97 @@ function ProfilePageContent() {
           
           {/* Próximas Conquistas */}
           <div>
-            <h3 className="text-xl font-semibold text-blue-300 mb-4">Próximas Conquistas</h3>
+            <h3 className="text-lg font-medium text-blue-300 mb-4">Próximas Conquistas</h3>
             
-            {carregandoJornada ? (
-              <div className="flex justify-center items-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-300"></div>
-                <span className="ml-3 text-gray-300">Carregando...</span>
-              </div>
-            ) : proximasConquistas.length === 0 ? (
+            {proximasConquistas.length === 0 ? (
               <p className="text-gray-400 italic">Parabéns! Você desbloqueou todas as conquistas disponíveis.</p>
             ) : (
               <div className="space-y-3">
                 {proximasConquistas.map((conquista) => (
-                  <div 
-                    key={conquista.id}
-                    className="bg-gray-700 bg-opacity-50 p-4 rounded-lg shadow flex items-center"
-                  >
-                    <div className="bg-gray-800 rounded-full p-2 mr-4">
-                      {conquista.icone}
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-white">{conquista.titulo}</h4>
-                      <p className="text-gray-300 text-sm">{conquista.descricao}</p>
+                  <div key={conquista.id} className="bg-gray-700 bg-opacity-50 p-3 rounded-lg">
+                    <div className="flex items-center">
+                      <div className="mr-3 opacity-50">{conquista.icone}</div>
+                      <div>
+                        <h4 className="font-medium text-gray-200">{conquista.titulo}</h4>
+                        <p className="text-sm text-gray-400">{conquista.descricao}</p>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             )}
           </div>
-        </section>
-        
-        {/* Seção Sua Jornada */}
-        <section className="bg-gray-800 bg-opacity-70 p-6 md:p-8 rounded-xl shadow-2xl w-full transform transition-all hover:scale-[1.02] duration-300">
-          <h2 className="text-2xl font-semibold text-gray-100 mb-6 border-b-2 border-purple-500 pb-3 flex items-center">
-            <IconJornada />
-            Sua Jornada
-          </h2>
-          
-          {carregandoJornada ? (
-            <div className="flex justify-center items-center py-12">
-              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-400"></div>
-              <span className="ml-3 text-gray-300">Carregando seus dados...</span>
-            </div>
-          ) : erroJornada ? (
-            <div className="text-center py-8">
-              <p className="text-red-400 mb-2">{erroJornada}</p>
-              <button 
-                onClick={carregarDadosJornada}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-md text-white text-sm transition-colors"
-              >
-                Tentar novamente
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-300">
-              <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg shadow">
-                <p className="text-sm text-purple-300">Dias Consecutivos</p>
-                <p className="text-2xl font-bold text-white">{jornadaData.diasConsecutivos}</p>
-              </div>
-              <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg shadow">
-                <p className="text-sm text-purple-300">Meditações no Mês</p>
-                <p className="text-2xl font-bold text-white">{jornadaData.meditacoesMes}</p>
-              </div>
-              <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg shadow">
-                <p className="text-sm text-purple-300">Meditações no Ano</p>
-                <p className="text-2xl font-bold text-white">{jornadaData.meditacoesAno}</p>
-              </div>
-              <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg shadow">
-                <p className="text-sm text-purple-300">Total de Meditações</p>
-                <p className="text-2xl font-bold text-white">{jornadaData.meditacoesTotal}</p>
-              </div>
-              <div className="sm:col-span-2 bg-gray-700 bg-opacity-50 p-4 rounded-lg shadow">
-                <p className="text-sm text-purple-300">Minutos Totais de Meditação</p>
-                <p className="text-2xl font-bold text-white">{jornadaData.minutosTotal.toLocaleString("pt-BR")} min</p>
-              </div>
-            </div>
-          )}
-        </section>
+        </div>
       </main>
-      
+
       {/* Popup de Seleção de Ícone */}
       {showIconPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-          <div className="bg-gray-800 p-6 rounded-lg shadow-xl max-w-sm w-full">
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-xl p-6 max-w-md w-full">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-white">Escolha seu Ícone</h3>
-              <button onClick={() => setShowIconPopup(false)} className="text-gray-400 hover:text-white">
+              <h3 className="text-xl font-semibold text-white">Escolha um ícone</h3>
+              <button
+                onClick={() => setShowIconPopup(false)}
+                className="text-gray-400 hover:text-white"
+                aria-label="Fechar"
+              >
                 <X size={24} />
               </button>
             </div>
             <div className="grid grid-cols-3 gap-4">
-              {profileIcons.map((iconSrc) => (
+              {profileIcons.map((icon, index) => (
                 <button
-                  key={iconSrc}
-                  onClick={() => handleIconSelect(iconSrc)}
-                  className={`p-2 rounded-lg hover:bg-purple-700 transition-colors ${selectedIcon === iconSrc ? "bg-purple-600 ring-2 ring-purple-400" : "bg-gray-700"}`}
-                  aria-label={`Selecionar ícone ${iconSrc.split("/").pop()?.split(".")[0].replace("icon_", "").replace("_", " ")}`}
+                  key={index}
+                  onClick={() => handleIconSelect(icon)}
+                  className={`p-2 rounded-lg hover:bg-gray-700 transition-colors ${
+                    selectedIcon === icon ? "ring-2 ring-purple-500 bg-gray-700" : ""
+                  }`}
                 >
-                  <Image src={iconSrc} alt={`Ícone ${iconSrc}`} width={64} height={64} className="rounded-full mx-auto" />
+                  <Image
+                    src={icon}
+                    alt={`Ícone de perfil ${index + 1}`}
+                    width={64}
+                    height={64}
+                    className="rounded-full"
+                  />
                 </button>
               ))}
             </div>
           </div>
         </div>
       )}
-      
+
       {/* Popup de Detalhes da Conquista */}
-      {showConquistaDetalhes && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-          <div className={`bg-gradient-to-br ${getBgColorByLevel(showConquistaDetalhes.nivel)} p-1 rounded-lg shadow-xl max-w-md w-full`}>
-            <div className="bg-gray-800 p-6 rounded-lg w-full h-full">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-semibold text-white">Conquista Desbloqueada</h3>
-                <button onClick={() => setShowConquistaDetalhes(null)} className="text-gray-400 hover:text-white">
-                  <X size={24} />
-                </button>
-              </div>
-              
-              <div className="text-center mb-6">
-                <div className="bg-gray-900 bg-opacity-30 rounded-full p-4 mx-auto mb-4 w-24 h-24 flex items-center justify-center">
-                  {showConquistaDetalhes.icone}
-                </div>
-                <h4 className="text-xl font-bold text-white mb-2">{showConquistaDetalhes.titulo}</h4>
-                <p className="text-gray-300">{showConquistaDetalhes.descricao}</p>
-              </div>
-              
-              <div className="text-center">
-                <div className={`inline-block px-4 py-2 rounded-full text-sm font-semibold capitalize ${
-                  showConquistaDetalhes.nivel === "bronze" ? "bg-amber-700 text-yellow-100" :
-                  showConquistaDetalhes.nivel === "prata" ? "bg-slate-400 text-white" :
-                  "bg-yellow-500 text-yellow-900"
-                }`}>
-                  Medalha de {showConquistaDetalhes.nivel}
-                </div>
+      {conquistaSelecionada && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-xl p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-white">{conquistaSelecionada.titulo}</h3>
+              <button
+                onClick={() => setConquistaSelecionada(null)}
+                className="text-gray-400 hover:text-white"
+                aria-label="Fechar"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <div className="flex flex-col items-center mb-4">
+              <div className="text-5xl mb-4">{conquistaSelecionada.icone}</div>
+              <p className="text-center text-gray-300">{conquistaSelecionada.descricao}</p>
+              <div className={`mt-4 px-4 py-1 rounded-full text-xs font-medium ${
+                conquistaSelecionada.nivel === "bronze" 
+                  ? "bg-amber-700 text-amber-100" 
+                  : conquistaSelecionada.nivel === "prata" 
+                  ? "bg-gray-500 text-gray-100" 
+                  : "bg-yellow-600 text-yellow-100"
+              }`}>
+                Nível {conquistaSelecionada.nivel === "bronze" ? "Bronze" : conquistaSelecionada.nivel === "prata" ? "Prata" : "Ouro"}
               </div>
             </div>
           </div>
         </div>
       )}
-      
+
       <Navbar />
     </div>
   );
