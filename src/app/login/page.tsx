@@ -6,7 +6,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation"; // Hook para navegação programática
 import { useAuth } from "@/contexts/AuthContext"; // Hook customizado para acesso ao contexto de autenticação
-//import Image from "next/image"; // Removido pois não estava sendo usado e causava erro de lint no deploy anterior
+import Image from "next/image"; // Removido pois não estava sendo usado e causava erro de lint no deploy anterior
 
 // Componente da Página de Login
 export default function LoginPage() {
@@ -56,11 +56,17 @@ export default function LoginPage() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 p-4">
       <div className="bg-gray-800 p-8 md:p-12 rounded-xl shadow-2xl w-full max-w-md transform transition-all hover:scale-105 duration-300">
         {/* Símbolo PWA - Placeholder circular */}
-        <div className="mx-auto mb-8 w-24 h-24 bg-gradient-to-tr from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c0-3.866-3.134-7-7-7S-2 7.134-2 11s3.134 7 7 7 7-3.134 7-7zM12 11h0M21 11c0-3.866-3.134-7-7-7s-7 3.134-7 7 3.134 7 7 7 7-3.134 7-7zM21 11h0M12 21c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7zm0 0h0" /> 
-          </svg>
+        <div className="mx-auto mb-8 w-40 h-40 flex items-center justify-center">
+          <Image 
+            src="/logoPlenitude.png" 
+            alt="Logo Plenitude" 
+            width={160} 
+            height={160} 
+            className="object-contain"
+          />
         </div>
+
+
 
         <h1 className="text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-8">
           PLENITUDE
