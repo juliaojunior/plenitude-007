@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { Edit3, X, Check, User, Award, Trophy, Star, Clock, Calendar, Zap } from "lucide-react";
 import { updateProfile } from "firebase/auth";
-import { doc, updateDoc, setDoc, getDoc, collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
+import { doc, updateDoc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 // Ícone para a seção Jornada
@@ -31,22 +31,13 @@ const profileIcons = [
   "/profile-icons/icon_abstract_lines.png",
 ];
 
-// Interface para os dados da jornada do usuário
-interface JornadaData {
-  diasConsecutivos: number;
-  meditacoesMes: number;
-  meditacoesAno: number;
-  meditacoesTotal: number;
-  minutosTotal: number;
-}
-
-// Dados padrão para a jornada do usuário (usados apenas enquanto carrega)
-const jornadaDataPadrao: JornadaData = {
-  diasConsecutivos: 0,
-  meditacoesMes: 0,
-  meditacoesAno: 0,
-  meditacoesTotal: 0,
-  minutosTotal: 0,
+// Dados de exemplo para a jornada do usuário
+const jornadaData = {
+  diasConsecutivos: 7,
+  meditacoesMes: 15,
+  meditacoesAno: 42,
+  meditacoesTotal: 42,
+  minutosTotal: 630,
 };
 
 // Definição das conquistas disponíveis
@@ -56,7 +47,7 @@ const conquistasDefinicoes = [
     titulo: "Primeiros Passos",
     descricao: "Complete sua primeira meditação",
     icone: <Zap className="h-8 w-8 text-yellow-400" />,
-    criterio: (jornada: JornadaData) => jornada.meditacoesTotal >= 1,
+    criterio: (jornada) => jornada.meditacoesTotal >= 1,
     nivel: "bronze"
   },
   {
@@ -64,7 +55,7 @@ const conquistasDefinicoes = [
     titulo: "Hábito Semanal",
     descricao: "Complete 7 meditações",
     icone: <Calendar className="h-8 w-8 text-yellow-400" />,
-    criterio: (jornada: JornadaData) => jornada.meditacoesTotal >= 7,
+    criterio: (jornada) => jornada.meditacoesTotal >= 7,
     nivel: "bronze"
   },
   {
@@ -72,7 +63,7 @@ const conquistasDefinicoes = [
     titulo: "Consistência",
     descricao: "Medite por 3 dias consecutivos",
     icone: <Clock className="h-8 w-8 text-yellow-400" />,
-    criterio: (jornada: JornadaData) => jornada.diasConsecutivos >= 3,
+    criterio: (jornada) => jornada.diasConsecutivos >= 3,
     nivel: "bronze"
   },
   {
@@ -80,7 +71,7 @@ const conquistasDefinicoes = [
     titulo: "Dedicação",
     descricao: "Acumule 60 minutos de meditação",
     icone: <Star className="h-8 w-8 text-yellow-400" />,
-    criterio: (jornada: JornadaData) => jornada.minutosTotal >= 60,
+    criterio: (jornada) => jornada.minutosTotal >= 60,
     nivel: "bronze"
   },
   {
@@ -88,7 +79,7 @@ const conquistasDefinicoes = [
     titulo: "Praticante Regular",
     descricao: "Complete 30 meditações",
     icone: <Award className="h-8 w-8 text-blue-400" />,
-    criterio: (jornada: JornadaData) => jornada.meditacoesTotal >= 30,
+    criterio: (jornada) => jornada.meditacoesTotal >= 30,
     nivel: "prata"
   },
   {
@@ -96,7 +87,7 @@ const conquistasDefinicoes = [
     titulo: "Rotina Diária",
     descricao: "Medite por 7 dias consecutivos",
     icone: <Calendar className="h-8 w-8 text-blue-400" />,
-    criterio: (jornada: JornadaData) => jornada.diasConsecutivos >= 7,
+    criterio: (jornada) => jornada.diasConsecutivos >= 7,
     nivel: "prata"
   },
   {
@@ -104,7 +95,7 @@ const conquistasDefinicoes = [
     titulo: "Hora Zen",
     descricao: "Acumule 300 minutos de meditação",
     icone: <Clock className="h-8 w-8 text-blue-400" />,
-    criterio: (jornada: JornadaData) => jornada.minutosTotal >= 300,
+    criterio: (jornada) => jornada.minutosTotal >= 300,
     nivel: "prata"
   },
   {
@@ -112,7 +103,7 @@ const conquistasDefinicoes = [
     titulo: "Mestre da Meditação",
     descricao: "Complete 100 meditações",
     icone: <Trophy className="h-8 w-8 text-purple-400" />,
-    criterio: (jornada: JornadaData) => jornada.meditacoesTotal >= 100,
+    criterio: (jornada) => jornada.meditacoesTotal >= 100,
     nivel: "ouro"
   },
   {
@@ -120,7 +111,7 @@ const conquistasDefinicoes = [
     titulo: "Compromisso Diário",
     descricao: "Medite por 30 dias consecutivos",
     icone: <Calendar className="h-8 w-8 text-purple-400" />,
-    criterio: (jornada: JornadaData) => jornada.diasConsecutivos >= 30,
+    criterio: (jornada) => jornada.diasConsecutivos >= 30,
     nivel: "ouro"
   },
   {
@@ -128,7 +119,7 @@ const conquistasDefinicoes = [
     titulo: "Jornada Iluminada",
     descricao: "Acumule 1000 minutos de meditação",
     icone: <Star className="h-8 w-8 text-purple-400" />,
-    criterio: (jornada: JornadaData) => jornada.minutosTotal >= 1000,
+    criterio: (jornada) => jornada.minutosTotal >= 1000,
     nivel: "ouro"
   }
 ];
@@ -149,11 +140,6 @@ function ProfilePageContent() {
   const [conquistasDesbloqueadas, setConquistasDesbloqueadas] = useState([]);
   const [proximasConquistas, setProximasConquistas] = useState([]);
   const [showConquistaDetalhes, setShowConquistaDetalhes] = useState(null);
-  
-  // Estado para dados da jornada
-  const [jornadaData, setJornadaData] = useState<JornadaData>(jornadaDataPadrao);
-  const [carregandoJornada, setCarregandoJornada] = useState(true);
-  const [erroJornada, setErroJornada] = useState("");
 
   // Efeito para carregar o ícone salvo do localStorage ao montar o componente
   useEffect(() => {
@@ -167,146 +153,9 @@ function ProfilePageContent() {
       setNewDisplayName(user.displayName);
     }
     
-    // Carrega os dados da jornada do usuário
-    if (user) {
-      carregarDadosJornada();
-    }
+    // Calcula conquistas desbloqueadas e próximas
+    calcularConquistas();
   }, [user]);
-  
-  // Efeito para calcular conquistas quando os dados da jornada são atualizados
-  useEffect(() => {
-    if (!carregandoJornada) {
-      calcularConquistas();
-    }
-  }, [jornadaData, carregandoJornada]);
-
-  // Função para carregar os dados da jornada do usuário do Firestore
-  const carregarDadosJornada = async () => {
-    if (!user) return;
-    
-    setCarregandoJornada(true);
-    setErroJornada("");
-    
-    try {
-      // Busca o documento do usuário
-      const userDocRef = doc(db, "users", user.uid);
-      const userDocSnap = await getDoc(userDocRef);
-      
-      // Verifica se o documento existe e tem dados de jornada
-      if (userDocSnap.exists()) {
-        const userData = userDocSnap.data();
-        
-        // Se já existem dados de jornada no documento do usuário
-        if (userData.jornada) {
-          setJornadaData(userData.jornada);
-        } else {
-          // Se não existem dados de jornada, calcula a partir do histórico
-          await calcularDadosJornadaDoHistorico();
-        }
-      } else {
-        // Se o documento do usuário não existe, calcula a partir do histórico
-        await calcularDadosJornadaDoHistorico();
-      }
-    } catch (error) {
-      console.error("Erro ao carregar dados da jornada:", error);
-      setErroJornada("Não foi possível carregar os dados da sua jornada.");
-      // Em caso de erro, mantém os dados padrão
-    } finally {
-      setCarregandoJornada(false);
-    }
-  };
-  
-  // Função para calcular os dados da jornada a partir do histórico de meditações
-  const calcularDadosJornadaDoHistorico = async () => {
-    if (!user) return;
-    
-    try {
-      // Busca o histórico de meditações do usuário
-      const historicoRef = collection(db, "historicoMeditacoes");
-      const q = query(
-        historicoRef,
-        where("userId", "==", user.uid),
-        orderBy("dataOuvida", "desc")
-      );
-      
-      const querySnapshot = await getDocs(q);
-      
-      if (querySnapshot.empty) {
-        // Se não há histórico, mantém os dados padrão
-        return;
-      }
-      
-      // Inicializa os dados da jornada
-      const jornada: JornadaData = {
-        diasConsecutivos: 0,
-        meditacoesMes: 0,
-        meditacoesAno: 0,
-        meditacoesTotal: 0,
-        minutosTotal: 0
-      };
-      
-      // Data atual para cálculos
-      const hoje = new Date();
-      const mesAtual = hoje.getMonth();
-      const anoAtual = hoje.getFullYear();
-      
-      // Conjunto para rastrear dias únicos para cálculo de dias consecutivos
-      const diasUnicos = new Set<string>();
-      
-      // Processa cada entrada do histórico
-      querySnapshot.forEach((doc) => {
-        const meditacao = doc.data();
-        const dataOuvida = meditacao.dataOuvida.toDate ? meditacao.dataOuvida.toDate() : new Date(meditacao.dataOuvida);
-        
-        // Incrementa o total de meditações
-        jornada.meditacoesTotal++;
-        
-        // Adiciona a duração ao total de minutos (se disponível)
-        if (meditacao.duracao) {
-          jornada.minutosTotal += meditacao.duracao;
-        } else if (meditacao.duracaoSegundos) {
-          // Se a duração estiver em segundos, converte para minutos
-          jornada.minutosTotal += Math.round(meditacao.duracaoSegundos / 60);
-        }
-        
-        // Verifica se é do mês atual
-        if (dataOuvida.getMonth() === mesAtual && dataOuvida.getFullYear() === anoAtual) {
-          jornada.meditacoesMes++;
-        }
-        
-        // Verifica se é do ano atual
-        if (dataOuvida.getFullYear() === anoAtual) {
-          jornada.meditacoesAno++;
-        }
-        
-        // Adiciona o dia ao conjunto de dias únicos (formato YYYY-MM-DD)
-        const diaFormatado = `${dataOuvida.getFullYear()}-${String(dataOuvida.getMonth() + 1).padStart(2, '0')}-${String(dataOuvida.getDate()).padStart(2, '0')}`;
-        diasUnicos.add(diaFormatado);
-      });
-      
-      // Calcula dias consecutivos (simplificado - apenas conta dias únicos)
-      // Em uma implementação real, seria necessário verificar se os dias são realmente consecutivos
-      jornada.diasConsecutivos = Math.min(diasUnicos.size, 30); // Limita a 30 para este exemplo
-      
-      // Atualiza o estado com os dados calculados
-      setJornadaData(jornada);
-      
-      // Opcionalmente, salva os dados calculados no documento do usuário para uso futuro
-      try {
-        const userDocRef = doc(db, "users", user.uid);
-        await updateDoc(userDocRef, {
-          jornada: jornada
-        });
-      } catch (error) {
-        console.error("Erro ao salvar dados da jornada no perfil:", error);
-        // Continua mesmo se falhar ao salvar
-      }
-      
-    } catch (error) {
-      console.error("Erro ao calcular dados da jornada:", error);
-      // Em caso de erro, mantém os dados padrão
-    }
-  };
 
   // Função para calcular conquistas desbloqueadas e próximas
   const calcularConquistas = () => {
@@ -357,8 +206,7 @@ function ProfilePageContent() {
           displayName: newDisplayName.trim(),
           email: user.email,
           role: "user", // Define o papel padrão como "user"
-          createdAt: new Date().toISOString(),
-          jornada: jornadaData // Inclui os dados da jornada atual
+          createdAt: new Date().toISOString()
         });
       }
       
@@ -489,12 +337,7 @@ function ProfilePageContent() {
           <div className="mb-8">
             <h3 className="text-xl font-semibold text-yellow-300 mb-4">Suas Conquistas</h3>
             
-            {carregandoJornada ? (
-              <div className="flex justify-center items-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-yellow-300"></div>
-                <span className="ml-3 text-gray-300">Carregando conquistas...</span>
-              </div>
-            ) : conquistasDesbloqueadas.length === 0 ? (
+            {conquistasDesbloqueadas.length === 0 ? (
               <p className="text-gray-400 italic">Você ainda não desbloqueou nenhuma conquista. Continue meditando!</p>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -518,12 +361,7 @@ function ProfilePageContent() {
           <div>
             <h3 className="text-xl font-semibold text-blue-300 mb-4">Próximas Conquistas</h3>
             
-            {carregandoJornada ? (
-              <div className="flex justify-center items-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-300"></div>
-                <span className="ml-3 text-gray-300">Carregando...</span>
-              </div>
-            ) : proximasConquistas.length === 0 ? (
+            {proximasConquistas.length === 0 ? (
               <p className="text-gray-400 italic">Parabéns! Você desbloqueou todas as conquistas disponíveis.</p>
             ) : (
               <div className="space-y-3">
@@ -552,46 +390,28 @@ function ProfilePageContent() {
             <IconJornada />
             Sua Jornada
           </h2>
-          
-          {carregandoJornada ? (
-            <div className="flex justify-center items-center py-12">
-              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-400"></div>
-              <span className="ml-3 text-gray-300">Carregando seus dados...</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-300">
+            <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg shadow">
+              <p className="text-sm text-purple-300">Dias Consecutivos</p>
+              <p className="text-2xl font-bold text-white">{jornadaData.diasConsecutivos}</p>
             </div>
-          ) : erroJornada ? (
-            <div className="text-center py-8">
-              <p className="text-red-400 mb-2">{erroJornada}</p>
-              <button 
-                onClick={carregarDadosJornada}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-md text-white text-sm transition-colors"
-              >
-                Tentar novamente
-              </button>
+            <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg shadow">
+              <p className="text-sm text-purple-300">Meditações no Mês</p>
+              <p className="text-2xl font-bold text-white">{jornadaData.meditacoesMes}</p>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-300">
-              <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg shadow">
-                <p className="text-sm text-purple-300">Dias Consecutivos</p>
-                <p className="text-2xl font-bold text-white">{jornadaData.diasConsecutivos}</p>
-              </div>
-              <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg shadow">
-                <p className="text-sm text-purple-300">Meditações no Mês</p>
-                <p className="text-2xl font-bold text-white">{jornadaData.meditacoesMes}</p>
-              </div>
-              <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg shadow">
-                <p className="text-sm text-purple-300">Meditações no Ano</p>
-                <p className="text-2xl font-bold text-white">{jornadaData.meditacoesAno}</p>
-              </div>
-              <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg shadow">
-                <p className="text-sm text-purple-300">Total de Meditações</p>
-                <p className="text-2xl font-bold text-white">{jornadaData.meditacoesTotal}</p>
-              </div>
-              <div className="sm:col-span-2 bg-gray-700 bg-opacity-50 p-4 rounded-lg shadow">
-                <p className="text-sm text-purple-300">Minutos Totais de Meditação</p>
-                <p className="text-2xl font-bold text-white">{jornadaData.minutosTotal.toLocaleString("pt-BR")} min</p>
-              </div>
+            <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg shadow">
+              <p className="text-sm text-purple-300">Meditações no Ano</p>
+              <p className="text-2xl font-bold text-white">{jornadaData.meditacoesAno}</p>
             </div>
-          )}
+            <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg shadow">
+              <p className="text-sm text-purple-300">Total de Meditações</p>
+              <p className="text-2xl font-bold text-white">{jornadaData.meditacoesTotal}</p>
+            </div>
+            <div className="sm:col-span-2 bg-gray-700 bg-opacity-50 p-4 rounded-lg shadow">
+              <p className="text-sm text-purple-300">Minutos Totais de Meditação</p>
+              <p className="text-2xl font-bold text-white">{jornadaData.minutosTotal.toLocaleString("pt-BR")} min</p>
+            </div>
+          </div>
         </section>
       </main>
       
