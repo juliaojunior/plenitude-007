@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react"; // Ícone para voltar
+import AudioPlayer from "@/components/AudioPlayer";
 
 // Dados da meditação
 const meditacao = {
@@ -40,14 +41,11 @@ export default function MeditacaoIndividualPage() {
         </div>
 
         {/* Player de Áudio */}
-        <div className="mb-8 p-6 bg-gray-800 bg-opacity-70 backdrop-blur-md rounded-lg shadow-lg">
-          <h2 className="text-xl font-semibold text-blue-300 mb-4">Ouça a Meditação</h2>
-          <audio controls className="w-full">
-            <source src={meditacao.audioUrl} type="audio/mpeg" />
-            Seu navegador não suporta o elemento de áudio.
-          </audio>
-          <p className="text-xs text-gray-500 mt-2">
-            Nota: Este é um áudio de exemplo. Em uma versão completa, cada meditação teria seu próprio arquivo de áudio.
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-blue-300 mb-4 px-6">Ouça a Meditação</h2>
+          <AudioPlayer src={meditacao.audioUrl} title={meditacao.titulo} />
+          <p className="text-xs text-gray-500 mt-2 px-6">
+             Nota: Este é um áudio de exemplo. Em uma versão completa, cada meditação teria seu próprio arquivo de áudio.
           </p>
         </div>
 
