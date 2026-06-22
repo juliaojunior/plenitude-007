@@ -18,9 +18,9 @@ export default function SignUpPage() {
             formFieldInput: "bg-[var(--bg-surface)] border-[var(--border)] text-[var(--text)] rounded-lg",
             formFieldLabel: "text-[var(--text-muted)]",
             footerActionLink: "text-[var(--gold)]",
-            socialButtonsBlockButton: "border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text)] hover:bg-[var(--bg-card)]",
-            dividerLine: "bg-[var(--border)]",
-            dividerText: "text-[var(--text-faint)]",
+            socialButtonsBlockButton: "hidden",
+            socialButtonsBlockButtonText: "hidden",
+            dividerRow: "hidden",
           },
         }}
       />
