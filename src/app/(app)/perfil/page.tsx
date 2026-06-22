@@ -8,6 +8,7 @@ import { progressoUsuario, conquistasUsuario, users } from "@/lib/db/schema"
 import { CONQUISTAS, TIER_COLORS } from "@/lib/conquistas"
 import { NomeEditor } from "@/components/nome-editor"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { LogoutButton } from "@/components/logout-button"
 
 export const metadata = { title: "Perfil" }
 
@@ -141,6 +142,11 @@ export default async function PerfilPage() {
           </div>
         </section>
       )}
+
+      {/* Sair */}
+      <section className="mb-8">
+        <LogoutButton />
+      </section>
     </div>
   )
 }
