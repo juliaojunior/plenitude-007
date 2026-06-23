@@ -4,7 +4,7 @@ export default function SignInPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-4">
       <div className="text-center">
-        <h1 className="font-display text-4xl font-light text-[var(--text)]">Plenitude</h1>
+        <h1 className="font-display text-4xl font-light text-[var(--text)]">Refúgio</h1>
         <p className="mt-1 text-sm text-[var(--text-muted)]">Meditações para o seu bem-estar</p>
       </div>
       <SignIn

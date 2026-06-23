@@ -19,10 +19,10 @@ const jakarta = Plus_Jakarta_Sans({
 })
 
 export const metadata: Metadata = {
-  title: { default: "Plenitude", template: "%s · Plenitude" },
+  title: { default: "Refúgio", template: "%s · Refúgio" },
   description: "Meditações cristãs para o seu bem-estar espiritual diário.",
   manifest: "/manifest.json",
-  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Plenitude" },
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Refúgio" },
   icons: {
     icon: [
       { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
