@@ -45,10 +45,10 @@ export default async function HomePage() {
         <ThemeToggle />
       </div>
 
-      {/* Palavra do Dia — The Signature Element */}
+      {/* Maná Diário — The Signature Element */}
       <section className="mb-8 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6">
         <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--gold)]">
-          Palavra do Dia
+          Maná Diário
         </p>
         {mana ? (
           <>
