@@ -1,6 +1,7 @@
 import { auth, currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { CATEGORIAS } from "@/lib/categorias"
 import { todayString } from "@/lib/utils"
@@ -79,19 +80,22 @@ export default async function HomePage() {
         <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-[var(--text-muted)]">
           Meditar agora
         </h2>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-4">
           {CATEGORIAS.map((cat) => (
             <Link
               key={cat.slug}
               href={`/meditacoes/${cat.slug}`}
-              className="group flex flex-col items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-4 text-center transition-all hover:border-[var(--gold)]/40 hover:shadow-md active:scale-[0.97]"
+              className="group flex flex-col items-center gap-2.5 text-center"
             >
-              <span
-                className="flex h-10 w-10 items-center justify-center rounded-full text-xl"
-                style={{ backgroundColor: cat.cor + "25" }}
-              >
-                {cat.emoji}
-              </span>
+              <div className="relative aspect-square w-full overflow-hidden rounded-full shadow-lg shadow-black/30 ring-1 ring-white/10 transition-all duration-300 group-hover:shadow-xl group-hover:ring-[var(--gold)]/50 group-active:scale-95">
+                <Image
+                  src={`/categorias/${cat.slug}.webp`}
+                  alt={cat.label}
+                  fill
+                  sizes="(max-width: 512px) 30vw, 150px"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+              </div>
               <span className="text-xs font-medium text-[var(--text)]">{cat.label}</span>
             </Link>
           ))}
