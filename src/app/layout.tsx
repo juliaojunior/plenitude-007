@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google"
 import { ClerkProvider } from "@clerk/nextjs"
 import { ThemeProvider } from "@/components/theme-provider"
+import { AnimatedBackground } from "@/components/animated-background"
 import "./globals.css"
 
 const cormorant = Cormorant_Garamond({
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <ClerkProvider>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+            <AnimatedBackground />
             {children}
           </ThemeProvider>
         </ClerkProvider>

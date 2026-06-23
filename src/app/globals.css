@@ -43,6 +43,16 @@
   --font-display:      var(--font-cormorant);
   --font-sans:         var(--font-jakarta);
   --radius-default:    var(--radius);
+  --animate-aurora:    aurora 60s linear infinite;
+  @keyframes aurora {
+    from { background-position: 50% 50%, 50% 50%; }
+    to   { background-position: 350% 50%, 350% 50%; }
+  }
+}
+
+/* Calm ambient background respects reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .aurora-layer::after { animation: none !important; }
 }
 
 /* ── Base ─────────────────────────────────────────────────── */
