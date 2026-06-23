@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { notFound } from "next/navigation"
 import { ChevronLeft } from "lucide-react"
 import { CATEGORIAS, getCategoria } from "@/lib/categorias"
@@ -37,13 +38,16 @@ export default async function CategoriaPage({ params }: Props) {
         <ChevronLeft size={16} /> Meditações
       </Link>
 
-      <div className="mb-6 flex items-center gap-3">
-        <span
-          className="flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
-          style={{ backgroundColor: cat.cor + "30" }}
-        >
-          {cat.emoji}
-        </span>
+      <div className="mb-6 flex items-center gap-4">
+        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full shadow-lg shadow-black/30 ring-1 ring-white/10">
+          <Image
+            src={`/categorias/${cat.slug}.webp`}
+            alt={cat.label}
+            fill
+            sizes="64px"
+            className="object-cover"
+          />
+        </div>
         <div>
           <h1 className="text-2xl font-semibold text-[var(--text)]">{cat.label}</h1>
           <p className="text-sm text-[var(--text-muted)]">{lista.length} meditações</p>

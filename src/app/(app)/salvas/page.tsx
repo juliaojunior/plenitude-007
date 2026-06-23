@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { Play } from "lucide-react"
 import { db } from "@/lib/db"
 import { favoritos, meditacoes } from "@/lib/db/schema"
@@ -55,12 +56,15 @@ export default async function SalvasPage() {
                 key={favId}
                 className="flex items-center gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-4"
               >
-                <span
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xl"
-                  style={{ backgroundColor: cat.cor + "25" }}
-                >
-                  {cat.emoji}
-                </span>
+                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full shadow-md shadow-black/30 ring-1 ring-white/10">
+                  <Image
+                    src={`/categorias/${cat.slug}.webp`}
+                    alt={cat.label}
+                    fill
+                    sizes="48px"
+                    className="object-cover"
+                  />
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-[var(--text)] truncate">{med.titulo}</p>
                   <div className="mt-0.5 flex items-center gap-2">
