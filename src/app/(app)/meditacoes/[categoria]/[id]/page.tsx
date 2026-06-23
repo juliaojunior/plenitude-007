@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { ChevronLeft } from "lucide-react"
 import { auth } from "@clerk/nextjs/server"
 import { eq, and } from "drizzle-orm"
@@ -57,20 +58,27 @@ export default async function MeditacaoPage({ params }: Props) {
         )}
       </div>
 
-      {/* Categoria badge */}
-      <div className="mb-3 flex items-center gap-2">
+      {/* Categoria hero */}
+      <div className="mb-8 flex flex-col items-center text-center">
+        <div className="relative mb-4 h-24 w-24 overflow-hidden rounded-full shadow-lg shadow-black/30 ring-1 ring-white/10">
+          <Image
+            src={`/categorias/${cat.slug}.webp`}
+            alt={cat.label}
+            fill
+            sizes="96px"
+            className="object-cover"
+          />
+        </div>
         <span
-          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium"
+          className="mb-3 inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
           style={{ backgroundColor: cat.cor + "25", color: cat.cor }}
         >
-          {cat.emoji} {cat.label}
+          {cat.label}
         </span>
+        <h1 className="text-3xl font-semibold leading-tight text-[var(--text)]">
+          {med.titulo}
+        </h1>
       </div>
-
-      {/* Title */}
-      <h1 className="mb-6 text-3xl font-semibold leading-tight text-[var(--text)]">
-        {med.titulo}
-      </h1>
 
       {/* Sacred text */}
       {med.textoBiblico && (
