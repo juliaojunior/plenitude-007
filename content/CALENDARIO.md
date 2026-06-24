@@ -59,7 +59,7 @@
 | 48 | 2026-08-13 | Temos a mente de Cristo — sabedoria sobrenatural | 1 Coríntios 2:16 |
 | 49 | 2026-08-14 | Quando orarmos, perdoar — perdão como prática diária | Marcos 11:25 |
 | 50 | 2026-08-15 | A esperança não decepciona — amor derramado no coração | Romanos 5:5 |
-| 51 | 2026-08-16 | O Senhor que cura — Jeová Rafa, médico da alma | Êxodo 15:26 |
+| 51 | 2026-08-16 | O Senhor que cura — o médico da alma | Êxodo 15:26 |
 | 52 | 2026-08-17 | Paz que excede todo entendimento — guarda mente e coração | Filipenses 4:7 |
 | 53 | 2026-08-18 | Dando graças ao Senhor — bondade e amor eterno | Salmos 107:1 |
 | 54 | 2026-08-19 | Esta é a direção — foco guiado pela voz de Deus | Isaías 30:21 |
