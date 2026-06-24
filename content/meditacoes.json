@@ -1,1 +1,182 @@
-[]
+[
+  {
+    "id": "med-ansiedade-1",
+    "titulo": "Entregando a Ansiedade",
+    "categoria": "ansiedade",
+    "referencia": "Filipenses 4:6-7",
+    "textoBiblico": "",
+    "transcricao": "",
+    "duracaoSegundos": null,
+    "urlAudio": null
+  },
+  {
+    "id": "med-ansiedade-2",
+    "titulo": "Respira e Confia",
+    "categoria": "ansiedade",
+    "referencia": "1 Pedro 5:7",
+    "textoBiblico": "",
+    "transcricao": "",
+    "duracaoSegundos": null,
+    "urlAudio": null
+  },
+  {
+    "id": "med-agradecer-1",
+    "titulo": "Coração Grato",
+    "categoria": "agradecer",
+    "referencia": "Salmos 100:1-5",
+    "textoBiblico": "",
+    "transcricao": "",
+    "duracaoSegundos": null,
+    "urlAudio": null
+  },
+  {
+    "id": "med-agradecer-2",
+    "titulo": "Contando as Bênçãos",
+    "categoria": "agradecer",
+    "referencia": "1 Tessalonicenses 5:16-18",
+    "textoBiblico": "",
+    "transcricao": "",
+    "duracaoSegundos": null,
+    "urlAudio": null
+  },
+  {
+    "id": "med-paz-1",
+    "titulo": "A Paz que Guarda",
+    "categoria": "paz",
+    "referencia": "João 14:27",
+    "textoBiblico": "",
+    "transcricao": "",
+    "duracaoSegundos": null,
+    "urlAudio": null
+  },
+  {
+    "id": "med-paz-2",
+    "titulo": "Quietude Diante de Deus",
+    "categoria": "paz",
+    "referencia": "Salmos 46:10",
+    "textoBiblico": "",
+    "transcricao": "",
+    "duracaoSegundos": null,
+    "urlAudio": null
+  },
+  {
+    "id": "med-sabedoria-1",
+    "titulo": "A Mente de Cristo em Mim",
+    "categoria": "sabedoria",
+    "referencia": "Tiago 1:5",
+    "textoBiblico": "",
+    "transcricao": "",
+    "duracaoSegundos": null,
+    "urlAudio": null
+  },
+  {
+    "id": "med-sabedoria-2",
+    "titulo": "Decisões com Discernimento",
+    "categoria": "sabedoria",
+    "referencia": "Provérbios 3:5-6",
+    "textoBiblico": "",
+    "transcricao": "",
+    "duracaoSegundos": null,
+    "urlAudio": null
+  },
+  {
+    "id": "med-sono-1",
+    "titulo": "Descansando nos Braços do Pai",
+    "categoria": "sono",
+    "referencia": "Salmos 4:8",
+    "textoBiblico": "",
+    "transcricao": "",
+    "duracaoSegundos": null,
+    "urlAudio": null
+  },
+  {
+    "id": "med-sono-2",
+    "titulo": "Soltando o Dia — O Sono do Amado",
+    "categoria": "sono",
+    "referencia": "Salmos 127:2",
+    "textoBiblico": "",
+    "transcricao": "",
+    "duracaoSegundos": null,
+    "urlAudio": null
+  },
+  {
+    "id": "med-foco-1",
+    "titulo": "Olhos Fixos em Jesus",
+    "categoria": "foco",
+    "referencia": "Hebreus 12:2",
+    "textoBiblico": "",
+    "transcricao": "",
+    "duracaoSegundos": null,
+    "urlAudio": null
+  },
+  {
+    "id": "med-foco-2",
+    "titulo": "Presente — Um Dia de Cada Vez",
+    "categoria": "foco",
+    "referencia": "Mateus 6:33-34",
+    "textoBiblico": "",
+    "transcricao": "",
+    "duracaoSegundos": null,
+    "urlAudio": null
+  },
+  {
+    "id": "med-perdao-1",
+    "titulo": "A Liberdade de Perdoar",
+    "categoria": "perdao",
+    "referencia": "Efésios 4:31-32",
+    "textoBiblico": "",
+    "transcricao": "",
+    "duracaoSegundos": null,
+    "urlAudio": null
+  },
+  {
+    "id": "med-perdao-2",
+    "titulo": "Recebendo o Perdão de Deus",
+    "categoria": "perdao",
+    "referencia": "1 João 1:9",
+    "textoBiblico": "",
+    "transcricao": "",
+    "duracaoSegundos": null,
+    "urlAudio": null
+  },
+  {
+    "id": "med-esperanca-1",
+    "titulo": "A Âncora da Alma",
+    "categoria": "esperanca",
+    "referencia": "Hebreus 6:19",
+    "textoBiblico": "",
+    "transcricao": "",
+    "duracaoSegundos": null,
+    "urlAudio": null
+  },
+  {
+    "id": "med-esperanca-2",
+    "titulo": "Planos de Futuro e Esperança",
+    "categoria": "esperanca",
+    "referencia": "Jeremias 29:11",
+    "textoBiblico": "",
+    "transcricao": "",
+    "duracaoSegundos": null,
+    "urlAudio": null
+  },
+  {
+    "id": "med-cura-1",
+    "titulo": "Jeová Rafa — O Deus que Cura",
+    "categoria": "cura",
+    "referencia": "Êxodo 15:26",
+    "textoBiblico": "",
+    "transcricao": "",
+    "duracaoSegundos": null,
+    "urlAudio": null
+  },
+  {
+    "id": "med-cura-2",
+    "titulo": "Cura de Dentro para Fora",
+    "categoria": "cura",
+    "referencia": "Salmos 147:3",
+    "textoBiblico": "",
+    "transcricao": "",
+    "duracaoSegundos": null,
+    "urlAudio": null
+  }
+]
