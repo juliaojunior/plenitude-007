@@ -94,7 +94,7 @@
 | Perdão | Recebendo o Perdão de Deus | 1 João 1:9 | ~6 min |
 | Esperança | A Âncora da Alma | Hebreus 6:19 | ~5 min |
 | Esperança | Planos de Futuro e Esperança | Jeremias 29:11 | ~5 min |
-| Cura | Jeová Rafa — O Deus que Cura | Êxodo 15:26 | ~6 min |
+| Cura | O Deus de Todo Consolo | 2 Coríntios 1:3-4 | ~6 min |
 | Cura | Cura de Dentro para Fora | Salmos 147:3 | ~6 min |
 
 ---
