@@ -24,6 +24,7 @@ export interface MeditacaoEntry {
   referencia: string
   textoBiblico: string
   transcricao: string
+  roteiroAudio: string
   duracaoSegundos: number | null
   urlAudio: string | null
 }

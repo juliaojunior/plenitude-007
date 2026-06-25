@@ -26,9 +26,11 @@ for (const m of meds) {
   porCategoria.set(m.categoria, (porCategoria.get(m.categoria) ?? 0) + 1)
   if (ids.has(m.id)) errors.push(`Meditação: id duplicado "${m.id}"`)
   ids.add(m.id)
-  for (const f of ["titulo", "referencia", "textoBiblico", "transcricao"] as const) {
+  for (const f of ["titulo", "referencia", "textoBiblico", "transcricao", "roteiroAudio"] as const) {
     if (!m[f]?.trim()) errors.push(`Meditação ${m.id}: ${f} vazio`)
   }
+  if (m.transcricao?.includes("<break")) errors.push(`Meditação ${m.id}: transcricao contém tags (deve ser texto limpo)`)
+  if (m.transcricao?.includes("[")) errors.push(`Meditação ${m.id}: transcricao contém tags (deve ser texto limpo)`)
 }
 for (const slug of CATEGORIA_SLUGS) {
   const c = porCategoria.get(slug) ?? 0
