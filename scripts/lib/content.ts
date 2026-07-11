@@ -29,6 +29,16 @@ export interface MeditacaoEntry {
   urlAudio: string | null
 }
 
+export interface SomEntry {
+  id: string
+  titulo: string
+  urlAudio: string
+  duracaoSegundos: number | null
+  imagem: string | null
+  cor: string | null
+  descricao: string | null
+}
+
 const root = resolve(process.cwd(), "content")
 
 export function loadMana(): ManaEntry[] {
@@ -36,6 +46,9 @@ export function loadMana(): ManaEntry[] {
 }
 export function loadMeditacoes(): MeditacaoEntry[] {
   return JSON.parse(readFileSync(resolve(root, "meditacoes.json"), "utf8"))
+}
+export function loadSons(): SomEntry[] {
+  return JSON.parse(readFileSync(resolve(root, "sons.json"), "utf8"))
 }
 
 export function expectedManaDates(): string[] {

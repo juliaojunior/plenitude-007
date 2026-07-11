@@ -4,10 +4,10 @@ config({ path: ".env.local" })
 import { neon } from "@neondatabase/serverless"
 import { drizzle } from "drizzle-orm/neon-http"
 import * as schema from "../src/lib/db/schema"
-import { loadMana, loadMeditacoes } from "./lib/content"
+import { loadMana, loadMeditacoes, loadSons } from "./lib/content"
 
 const db = drizzle(neon(process.env.DATABASE_URL!), { schema })
-const { manadiario, meditacoes } = schema
+const { manadiario, meditacoes, sons } = schema
 
 async function main() {
   const mana = loadMana()
@@ -46,5 +46,25 @@ async function main() {
     })
   }
   console.log(`✓ Meditações: ${meds.length} upserts`)
+
+  const somsList = loadSons()
+  for (const s of somsList) {
+    await db.insert(sons).values({
+      id: s.id,
+      titulo: s.titulo,
+      urlAudio: s.urlAudio,
+      duracaoSegundos: s.duracaoSegundos,
+      imagem: s.imagem,
+      cor: s.cor,
+      descricao: s.descricao,
+    }).onConflictDoUpdate({
+      target: sons.id,
+      set: {
+        titulo: s.titulo, urlAudio: s.urlAudio, duracaoSegundos: s.duracaoSegundos,
+        imagem: s.imagem, cor: s.cor, descricao: s.descricao, updatedAt: new Date(),
+      },
+    })
+  }
+  console.log(`✓ Sons: ${somsList.length} upserts`)
 }
 main().catch((e) => { console.error(e); process.exit(1) })
