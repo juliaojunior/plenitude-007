@@ -19,3 +19,9 @@ Registro de sprints e decisões de produto/técnicas, por seção. Não sobrescr
 **Fora do escopo (não fiz, de propósito):** grade de séries, tabela de conclusão de sons por usuário, favoritar sons, troca de domínio, página 404, reedição de áudio.
 
 **Verificação:** `tsc --noEmit` limpo, `npm run lint` limpo (só um warning pré-existente não relacionado), `npm run build` completo com sucesso e `/sons/[id]` listado nas rotas. Testado localmente (`npm run dev`): `/home` e `/sons/[id]` redirecionam corretamente para `/sign-in` quando deslogado (middleware/Clerk intactos) — teste visual logado da UI não foi possível localmente porque as chaves Clerk são de produção e só autenticam no domínio `plenitude.muitomelhor.net` (restrição conhecida do projeto); validar no preview da Vercel gerado a partir desta branch.
+
+## Atualização de segurança — Next.js / React Server Components (2026-07-11)
+
+**Branch:** `chore/seguranca-nextjs` (a partir de `main`, sem merge).
+
+Atualizado `next` 16.2.9 → **16.2.10**, `react`/`react-dom` 19.2.4 → **19.2.7** e `eslint-config-next` para acompanhar, cobrindo as correções de segurança de RSC de maio/2026 (CVE-2026-23870 de negação de serviço + bypass de autorização via proxy). Os pacotes `react-server-dom-*` não são dependência direta do projeto — vêm embutidos no `next`, então já foram junto. Nenhum ajuste de código foi necessário; build, lint e o redirect de autenticação (`/home`, `/sons/[id]` → `/sign-in` quando deslogado) continuam idênticos ao testar localmente. `npm audit` aponta 7 vulnerabilidades moderadas pré-existentes, sem relação com esta atualização (esbuild via `drizzle-kit` — só dev tooling; postcss vendorizado dentro do próprio `next`, sem fix disponível upstream) — não foram tocadas, ficam para outra hora se o usuário quiser.
