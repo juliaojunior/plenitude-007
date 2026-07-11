@@ -42,7 +42,7 @@ export function Carousel({ children }: { children: React.ReactNode }) {
       onPointerLeave={resume}
       onTouchStart={pause}
       onTouchEnd={resume}
-      className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       {children}
     </div>
