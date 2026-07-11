@@ -29,6 +29,18 @@ export const meditacoes = pgTable("meditacoes", {
   updatedAt: timestamp("updated_at").defaultNow(),
 })
 
+export const sons = pgTable("sons", {
+  id: text("id").primaryKey(),
+  titulo: text("titulo").notNull(),
+  urlAudio: text("url_audio").notNull(),
+  duracaoSegundos: integer("duracao_segundos"),
+  imagem: text("imagem"),
+  cor: text("cor"),
+  descricao: text("descricao"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+})
+
 export const manadiario = pgTable("mana_diario", {
   id: text("id").primaryKey(),
   data: text("data").notNull().unique(), // YYYY-MM-DD
