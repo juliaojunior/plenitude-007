@@ -3,9 +3,10 @@ import { redirect } from "next/navigation"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { CategoriasCarrossel } from "@/components/categorias-carrossel"
 import { SonsCarrossel } from "@/components/sons-carrossel"
+import { SeriesGrid } from "@/components/series-grid"
 import { todayString } from "@/lib/utils"
 import { db } from "@/lib/db"
-import { manadiario, sons } from "@/lib/db/schema"
+import { manadiario, sons, series } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 
 export const revalidate = 3600
@@ -28,6 +29,14 @@ async function getSons() {
   }
 }
 
+async function getSeries() {
+  try {
+    return await db.select().from(series)
+  } catch {
+    return []
+  }
+}
+
 export default async function HomePage() {
   const { userId } = await auth()
   if (!userId) redirect("/sign-in")
@@ -40,6 +49,7 @@ export default async function HomePage() {
 
   const mana = await getManaHoje()
   const sonsList = await getSons()
+  const seriesList = await getSeries()
 
   return (
     <div className="mx-auto max-w-lg px-4 pt-6">
@@ -101,7 +111,15 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* TODO Sprint 2: grade de séries */}
+      {/* Séries */}
+      {seriesList.length > 0 && (
+        <section className="mb-8">
+          <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-[var(--text-muted)]">
+            Séries
+          </h2>
+          <SeriesGrid series={seriesList} />
+        </section>
+      )}
     </div>
   )
 }
