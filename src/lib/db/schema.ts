@@ -16,10 +16,20 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow(),
 })
 
+export const series = pgTable("series", {
+  id: text("id").primaryKey(),
+  titulo: text("titulo").notNull(),
+  imagem: text("imagem"),
+  cor: text("cor"),
+  createdAt: timestamp("created_at").defaultNow(),
+})
+
 export const meditacoes = pgTable("meditacoes", {
   id: text("id").primaryKey(),
   titulo: text("titulo").notNull(),
-  categoria: text("categoria").notNull(),
+  // Nullable: uma linha pertence a uma categoria OU a uma série, nunca as duas.
+  categoria: text("categoria"),
+  serieId: text("serie_id").references(() => series.id, { onDelete: "cascade" }),
   urlAudio: text("url_audio"),
   textoBiblico: text("texto_biblico"),
   referencia: text("referencia"),
