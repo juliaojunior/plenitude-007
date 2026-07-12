@@ -5,6 +5,7 @@ import {
   boolean,
   integer,
   json,
+  uniqueIndex,
 } from "drizzle-orm/pg-core"
 
 export const users = pgTable("users", {
@@ -71,6 +72,22 @@ export const favoritos = pgTable("favoritos", {
     .references(() => meditacoes.id, { onDelete: "cascade" }),
   savedAt: timestamp("saved_at").defaultNow(),
 })
+
+// Registro individual de conclusão (1 linha por usuário+meditação), distinto
+// dos contadores agregados em progressoUsuario. Usado pra calcular progresso
+// de série e desbloquear a conquista de série completa.
+export const meditacoesConcluidas = pgTable("meditacoes_concluidas", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  meditacaoId: text("meditacao_id")
+    .notNull()
+    .references(() => meditacoes.id, { onDelete: "cascade" }),
+  concluidaEm: timestamp("concluida_em").defaultNow(),
+}, (t) => [
+  uniqueIndex("meditacoes_concluidas_user_med_idx").on(t.userId, t.meditacaoId),
+])
 
 export const progressoUsuario = pgTable("progresso_usuario", {
   userId: text("user_id")
