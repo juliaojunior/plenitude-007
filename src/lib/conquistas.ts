@@ -1,5 +1,10 @@
 export type Tier = "bronze" | "prata" | "ouro"
 
+// Conquistas de série são dinâmicas (uma por série, geradas a partir do
+// título da série) em vez de entradas estáticas em CONQUISTAS — ver
+// verificarConquistaDeSerie em src/app/actions/progresso.ts.
+export const SERIE_CONQUISTA_PREFIX = "serie-completa-"
+
 export interface Conquista {
   id: string
   titulo: string

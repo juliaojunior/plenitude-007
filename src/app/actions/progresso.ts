@@ -1,12 +1,45 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { progressoUsuario, conquistasUsuario, users } from "@/lib/db/schema"
-import { eq } from "drizzle-orm"
-import { CONQUISTAS } from "@/lib/conquistas"
+import { progressoUsuario, conquistasUsuario, users, meditacoesConcluidas, meditacoes } from "@/lib/db/schema"
+import { eq, and, count } from "drizzle-orm"
+import { CONQUISTAS, SERIE_CONQUISTA_PREFIX } from "@/lib/conquistas"
 import { nanoid } from "@/lib/nanoid"
 import { todayString } from "@/lib/utils"
 import { revalidatePath } from "next/cache"
+
+async function verificarConquistaDeSerie(userId: string, meditacaoId: string) {
+  const [med] = await db
+    .select({ serieId: meditacoes.serieId })
+    .from(meditacoes)
+    .where(eq(meditacoes.id, meditacaoId))
+    .limit(1)
+  if (!med?.serieId) return
+  const serieId = med.serieId
+
+  const [{ total }] = await db
+    .select({ total: count() })
+    .from(meditacoes)
+    .where(eq(meditacoes.serieId, serieId))
+
+  const [{ feitas }] = await db
+    .select({ feitas: count() })
+    .from(meditacoesConcluidas)
+    .innerJoin(meditacoes, eq(meditacoesConcluidas.meditacaoId, meditacoes.id))
+    .where(and(eq(meditacoesConcluidas.userId, userId), eq(meditacoes.serieId, serieId)))
+
+  if (total === 0 || feitas < total) return
+
+  const conquistaId = `${SERIE_CONQUISTA_PREFIX}${serieId}`
+  const [ja] = await db
+    .select()
+    .from(conquistasUsuario)
+    .where(and(eq(conquistasUsuario.userId, userId), eq(conquistasUsuario.conquistaId, conquistaId)))
+    .limit(1)
+  if (!ja) {
+    await db.insert(conquistasUsuario).values({ id: nanoid(), userId, conquistaId })
+  }
+}
 
 export async function registrarMeditacaoConcluida(
   meditacaoId: string,
@@ -19,6 +52,11 @@ export async function registrarMeditacaoConcluida(
     // Garantir que o usuário existe
     const [u] = await db.select().from(users).where(eq(users.id, userId)).limit(1)
     if (!u) return
+
+    // Registro individual (idempotente): guarda a 1ª conclusão dessa meditação por esse usuário.
+    await db.insert(meditacoesConcluidas)
+      .values({ id: nanoid(), userId, meditacaoId })
+      .onConflictDoNothing()
 
     const [prog] = await db
       .select()
@@ -89,6 +127,8 @@ export async function registrarMeditacaoConcluida(
         }
       }
     }
+
+    await verificarConquistaDeSerie(userId, meditacaoId)
 
     revalidatePath("/perfil")
   } catch (e) {
