@@ -51,6 +51,28 @@ export function loadSons(): SomEntry[] {
   return JSON.parse(readFileSync(resolve(root, "sons.json"), "utf8"))
 }
 
+export interface SerieEntry {
+  id: string
+  titulo: string
+  imagem?: string | null
+  cor?: string | null
+}
+
+export interface SerieItemEntry {
+  id: string
+  serieId: string
+  titulo: string
+  urlAudio: string
+  duracaoSegundos: number | null
+}
+
+export function loadSeries(): SerieEntry[] {
+  return JSON.parse(readFileSync(resolve(root, "series.json"), "utf8"))
+}
+export function loadSerieItens(): SerieItemEntry[] {
+  return JSON.parse(readFileSync(resolve(root, "series-itens.json"), "utf8"))
+}
+
 export function expectedManaDates(): string[] {
   const out: string[] = []
   const start = new Date(`${MANA_START_DATE}T00:00:00Z`)

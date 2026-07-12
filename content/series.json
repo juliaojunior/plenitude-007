@@ -1,0 +1,13 @@
+[
+  { "id": "serie-gravidez", "titulo": "Gravidez", "cor": "#C98FA0" },
+  { "id": "serie-compaixao", "titulo": "Compaixão", "cor": "#B97A73" },
+  { "id": "serie-esta-tudo-bem", "titulo": "Está tudo bem", "cor": "#6E9887" },
+  { "id": "serie-incertezas", "titulo": "Incertezas", "cor": "#5B7290" },
+  { "id": "serie-momento-presente", "titulo": "Momento presente", "cor": "#A98B5D" },
+  { "id": "serie-comece-a-meditar", "titulo": "Comece a meditar", "cor": "#8577B0" },
+  { "id": "serie-primeiros-passos", "titulo": "Primeiros passos", "cor": "#5FA8A0" },
+  { "id": "serie-bom-dia", "titulo": "Bom dia", "cor": "#E0A458" },
+  { "id": "serie-boa-noite", "titulo": "Boa noite", "cor": "#35507A" },
+  { "id": "serie-historias-biblicas", "titulo": "Histórias bíblicas", "cor": "#A6862F" },
+  { "id": "serie-sos", "titulo": "SOS", "cor": "#B5495B" }
+]
