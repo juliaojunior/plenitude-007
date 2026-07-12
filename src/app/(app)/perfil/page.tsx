@@ -2,10 +2,10 @@ import { auth, currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { Bell } from "lucide-react"
-import { eq } from "drizzle-orm"
+import { eq, inArray } from "drizzle-orm"
 import { db } from "@/lib/db"
-import { progressoUsuario, conquistasUsuario, users } from "@/lib/db/schema"
-import { CONQUISTAS, TIER_COLORS } from "@/lib/conquistas"
+import { progressoUsuario, conquistasUsuario, users, series } from "@/lib/db/schema"
+import { CONQUISTAS, TIER_COLORS, SERIE_CONQUISTA_PREFIX, type Conquista } from "@/lib/conquistas"
 import { NomeEditor } from "@/components/nome-editor"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { LogoutButton } from "@/components/logout-button"
@@ -40,7 +40,25 @@ export default async function PerfilPage() {
     .where(eq(conquistasUsuario.userId, userId))
 
   const conquistasIds = new Set(conquistasDesbloqueadas.map((c) => c.conquistaId))
-  const desbloqueadas = CONQUISTAS.filter((c) => conquistasIds.has(c.id))
+
+  // Conquistas de série são dinâmicas (uma por série concluída) — não vivem em CONQUISTAS.
+  const serieIdsCompletas = conquistasDesbloqueadas
+    .map((c) => c.conquistaId)
+    .filter((id) => id.startsWith(SERIE_CONQUISTA_PREFIX))
+    .map((id) => id.slice(SERIE_CONQUISTA_PREFIX.length))
+  const seriesCompletas = serieIdsCompletas.length > 0
+    ? await db.select().from(series).where(inArray(series.id, serieIdsCompletas))
+    : []
+  const desbloqueadasSerie: Conquista[] = seriesCompletas.map((s) => ({
+    id: `${SERIE_CONQUISTA_PREFIX}${s.id}`,
+    titulo: s.titulo,
+    descricao: `Série completa: todas as meditações de "${s.titulo}" concluídas`,
+    emoji: "🎧",
+    tier: "prata",
+    criterio: () => true,
+  }))
+
+  const desbloqueadas = [...CONQUISTAS.filter((c) => conquistasIds.has(c.id)), ...desbloqueadasSerie]
   const bloqueadas = CONQUISTAS.filter((c) => !conquistasIds.has(c.id)).slice(0, 3)
 
   const nome = dbUser?.name ?? clerkUser?.firstName ?? "Usuário"
