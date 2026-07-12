@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import type { series } from "@/lib/db/schema"
 
-type Serie = typeof series.$inferSelect
+type Serie = typeof series.$inferSelect & { total: number; concluidas: number }
 
 export function SeriesGrid({ series }: { series: Serie[] }) {
   return (
@@ -25,9 +25,16 @@ export function SeriesGrid({ series }: { series: Serie[] }) {
                 className="object-cover"
               />
             )}
-            <span className="relative z-10 w-full p-2 text-center text-xs font-medium leading-tight text-[var(--text)] line-clamp-2">
-              {serie.titulo}
-            </span>
+            <div className="relative z-10 w-full p-2 text-center">
+              <span className="block text-xs font-medium leading-tight text-[var(--text)] line-clamp-2">
+                {serie.titulo}
+              </span>
+              {serie.total > 0 && (
+                <span className="mt-0.5 block text-[10px] text-[var(--text)]/70">
+                  {serie.concluidas}/{serie.total}
+                </span>
+              )}
+            </div>
           </div>
         </Link>
       ))}
