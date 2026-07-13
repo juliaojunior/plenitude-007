@@ -9,6 +9,7 @@ import { meditacoes, favoritos } from "@/lib/db/schema"
 import { getCategoria, CATEGORIAS } from "@/lib/categorias"
 import { FavoritoButton } from "@/components/favorito-button"
 import { AudioPlayer } from "@/components/audio-player"
+import { TranscricaoExpandivel } from "@/components/transcricao-expandivel"
 
 interface Props {
   params: Promise<{ categoria: string; id: string }>
@@ -109,7 +110,7 @@ export default async function MeditacaoPage({ params }: Props) {
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--text-muted)]">
             Reflexão
           </h2>
-          <p className="text-sm leading-relaxed text-[var(--text-muted)]">{med.transcricao}</p>
+          <TranscricaoExpandivel texto={med.transcricao} />
         </section>
       )}
     </div>
