@@ -1,6 +1,6 @@
 import {
   loadMana, loadMeditacoes, expectedManaDates,
-  CATEGORIA_SLUGS, MANA_COUNT,
+  CATEGORIA_SLUGS, MANA_COUNT, loadSeries, loadSerieItens,
 } from "./lib/content"
 
 const errors: string[] = []
@@ -35,6 +35,25 @@ for (const m of meds) {
 for (const slug of CATEGORIA_SLUGS) {
   const c = porCategoria.get(slug) ?? 0
   if (c !== 2) errors.push(`Categoria "${slug}": ${c} meditações (esperado 2)`)
+}
+
+const seriesList = loadSeries()
+if (seriesList.length !== 11) errors.push(`Séries: esperado 11, achou ${seriesList.length}`)
+const serieIds = new Set<string>()
+for (const s of seriesList) {
+  if (serieIds.has(s.id)) errors.push(`Série: id duplicado "${s.id}"`)
+  serieIds.add(s.id)
+  if (!s.titulo?.trim()) errors.push(`Série ${s.id}: titulo vazio`)
+}
+
+const serieItens = loadSerieItens()
+const serieItemIds = new Set<string>()
+for (const item of serieItens) {
+  if (serieItemIds.has(item.id)) errors.push(`Item de série: id duplicado "${item.id}"`)
+  serieItemIds.add(item.id)
+  if (!serieIds.has(item.serieId)) errors.push(`Item de série ${item.id}: serieId "${item.serieId}" não existe em series.json`)
+  if (!item.titulo?.trim()) errors.push(`Item de série ${item.id}: titulo vazio`)
+  if (!item.urlAudio?.trim()) errors.push(`Item de série ${item.id}: urlAudio vazio`)
 }
 
 if (errors.length) {
