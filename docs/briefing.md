@@ -31,3 +31,26 @@ Atualizado `next` 16.2.9 → **16.2.10**, `react`/`react-dom` 19.2.4 → **19.2.
 **Branch:** `fix/transcricao-mostrar-mais` (a partir de `main`, sem merge).
 
 Na tela de meditação individual (`/meditacoes/[categoria]/[id]`), a transcrição agora começa truncada em 4 linhas (`line-clamp-4`, CSS nativo do Tailwind v4 — corta sempre em quebra de palavra, nunca no meio de uma) com um botão "Mostrar mais"/"Mostrar menos". Novo componente `src/components/transcricao-expandivel.tsx`: mede via `scrollHeight` vs `clientHeight` se o texto realmente estourou o clamp (`useEffect` pós-montagem) e só então mostra o botão — transcrições curtas não ganham botão. Transição de expandir/recolher usa `motion` (`layout` prop, já instalado no projeto) para animar a altura suavemente via FLIP, sem cálculo manual de pixels; respeita `prefers-reduced-motion` via `useReducedMotion()` do próprio `motion` (desliga a animação, mantém o toggle instantâneo). Texto bíblico e o resto da tela não foram tocados.
+
+## Sessão de 2026-07-13 — Diagnóstico produção + integração de séries em `main`
+
+**Branches envolvidas:**
+- `main` — agora contém tudo: carrosséis (Sprint 1), atualização de segurança Next/React, transcrição "Mostrar mais" e a grade de séries completa. É o que está em produção.
+- `merge-series-para-main` — branch intermediária de teste (merge de `feat/series-grade` antes de ir pra `main`), mantida por enquanto, não apagar sem necessidade.
+- `feat/series-grade` — mantida, já mesclada em `main` via `merge-series-para-main`.
+
+**O que foi feito:**
+1. Diagnóstico de um problema em produção não relacionado a séries: a versão testada era a URL de deployment com hash (protegida por Vercel Deployment Protection) e não o domínio real `plenitude.muitomelhor.net` — causava tanto o bloqueio de CORS/SSO quanto a rejeição do Clerk (chave `pk_live_` travada nesse domínio). Não era bug de código.
+2. Diagnóstico de "cards de série não aparecem em produção": causa raiz era `feat/series-grade` nunca ter sido mesclada em `main` (branch existia isolada, sem PR aberta). Não era problema de deploy, build ou banco.
+3. Merge de teste: `merge-series-para-main` criada a partir de `main`, com `feat/series-grade` mesclada sem conflitos (arquivos não se sobrepunham com `fix/transcricao-mostrar-mais`). Build limpo. Push gerou preview na Vercel, testado e aprovado pelo usuário.
+4. Merge final em `main` (`--no-ff`, histórico preservado) e push, disparando deploy de produção.
+5. `db:push` contra o banco de produção: "No changes detected" — schema já estava sincronizado (ver ponto importante abaixo).
+6. `content:seed` rodado explicitamente contra a `DATABASE_URL` de produção. Confirmado direto no banco: 11 séries, 73 meditações (18 de categoria + 55 de série), sem duplicação.
+
+**Descoberta importante (não é bug, mas é bom lembrar):** o `DATABASE_URL` em `.env.local` e o `DATABASE_URL` de produção na Vercel **são o mesmo banco Neon**. Não há separação dev/prod — todo teste local roda direto contra produção. Foi assim que os dados de série já estavam parcialmente populados antes mesmo do seed desta sessão (o dev já tinha testado o fluxo real localmente, o que bateu direto no banco de produção).
+
+**Pendente / não iniciado:**
+- Geração de áudio real para as 55 meditações de série — hoje todas usam o mesmo MP3 placeholder reaproveitado de `med-paz-1`. Prompt/roteiro de áudio ainda não executado.
+- Limpeza de dados de teste em produção: existem 3 linhas em `meditacoes_concluidas` e 2 em `favoritos` ligadas a um `user_id` real do Clerk. O usuário confirmou que esse usuário de teste é ele mesmo e decidiu **deixar como está** — não precisa limpar.
+
+**Decisões em aberto que dependem do usuário:** nenhuma no momento — os dois pontos pendentes acima já têm decisão tomada (áudio: ainda não priorizado; dado de teste: mantido).
