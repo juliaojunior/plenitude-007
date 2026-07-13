@@ -67,14 +67,34 @@ export default async function SerieItemPage({ params }: Props) {
         </h1>
       </div>
 
+      {item.textoBiblico && (
+        <div className="mb-6 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-5">
+          <blockquote className="sacred-text mb-2 text-[1.1rem]">
+            &ldquo;{item.textoBiblico}&rdquo;
+          </blockquote>
+          {item.referencia && <p className="sacred-ref">{item.referencia}</p>}
+        </div>
+      )}
+
       {item.urlAudio && (
-        <AudioPlayer
-          src={item.urlAudio}
-          titulo={item.titulo}
-          meditacaoId={itemId}
-          userId={userId}
-          duracaoSegundos={item.duracaoSegundos ?? undefined}
-        />
+        <div className="mb-6">
+          <AudioPlayer
+            src={item.urlAudio}
+            titulo={item.titulo}
+            meditacaoId={itemId}
+            userId={userId}
+            duracaoSegundos={item.duracaoSegundos ?? undefined}
+          />
+        </div>
+      )}
+
+      {item.transcricao && (
+        <section className="mb-8">
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--text-muted)]">
+            Reflexão
+          </h2>
+          <p className="text-sm leading-relaxed text-[var(--text-muted)]">{item.transcricao}</p>
+        </section>
       )}
     </div>
   )

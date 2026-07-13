@@ -1,13 +1,13 @@
 [
-  { "id": "serie-gravidez", "titulo": "Gravidez", "cor": "#C98FA0" },
-  { "id": "serie-compaixao", "titulo": "Compaixão", "cor": "#B97A73" },
-  { "id": "serie-esta-tudo-bem", "titulo": "Está tudo bem", "cor": "#6E9887" },
-  { "id": "serie-incertezas", "titulo": "Incertezas", "cor": "#5B7290" },
-  { "id": "serie-momento-presente", "titulo": "Momento presente", "cor": "#A98B5D" },
-  { "id": "serie-comece-a-meditar", "titulo": "Comece a meditar", "cor": "#8577B0" },
-  { "id": "serie-primeiros-passos", "titulo": "Primeiros passos", "cor": "#5FA8A0" },
-  { "id": "serie-bom-dia", "titulo": "Bom dia", "cor": "#E0A458" },
-  { "id": "serie-boa-noite", "titulo": "Boa noite", "cor": "#35507A" },
-  { "id": "serie-historias-biblicas", "titulo": "Histórias bíblicas", "cor": "#A6862F" },
-  { "id": "serie-sos", "titulo": "SOS", "cor": "#B5495B" }
+  { "id": "serie-gravidez", "titulo": "Gravidez", "cor": "#C98FA0", "descricao": "Meditações para acompanhar a espera de um filho — o corpo que muda, os medos que surgem e a certeza de que essa vida também está nas mãos de Deus." },
+  { "id": "serie-compaixao", "titulo": "Compaixão", "cor": "#B97A73", "descricao": "Meditações para abrir o coração ao próximo — e a você mesmo — com a mesma misericórdia que Deus usa com todos nós." },
+  { "id": "serie-esta-tudo-bem", "titulo": "Está tudo bem", "cor": "#6E9887", "descricao": "Meditações de acolhimento para os dias difíceis, quando o chão parece instável e você precisa ouvir, mais uma vez, que vai ficar bem." },
+  { "id": "serie-incertezas", "titulo": "Incertezas", "cor": "#5B7290", "descricao": "Meditações para os momentos em que o futuro não tem respostas — para aprender a confiar mesmo sem enxergar o próximo passo." },
+  { "id": "serie-momento-presente", "titulo": "Momento presente", "cor": "#A98B5D", "descricao": "Meditações para desacelerar e habitar o agora, soltando o peso do passado e a ansiedade do futuro." },
+  { "id": "serie-comece-a-meditar", "titulo": "Comece a meditar", "cor": "#8577B0", "descricao": "Uma introdução guiada à meditação cristã, passo a passo — respiração, silêncio e atenção à presença de Deus, para quem está começando." },
+  { "id": "serie-primeiros-passos", "titulo": "Primeiros passos", "cor": "#5FA8A0", "descricao": "Meditações para quem está dando os primeiros passos na fé — os fundamentos da oração, da Palavra e de uma vida com Deus." },
+  { "id": "serie-bom-dia", "titulo": "Bom dia", "cor": "#E0A458", "descricao": "Meditações curtas para começar o dia com gratidão e propósito, antes que a correria tome conta." },
+  { "id": "serie-boa-noite", "titulo": "Boa noite", "cor": "#35507A", "descricao": "Meditações para encerrar o dia, soltar as tensões acumuladas e adormecer em paz." },
+  { "id": "serie-historias-biblicas", "titulo": "Histórias bíblicas", "cor": "#A6862F", "descricao": "Meditações que revisitam histórias da Bíblia com calma, para encontrar nelas um espelho para a sua própria jornada." },
+  { "id": "serie-sos", "titulo": "SOS", "cor": "#B5495B", "descricao": "Meditações rápidas para os momentos de crise — quando você precisa de socorro imediato e não tem tempo a perder." }
 ]

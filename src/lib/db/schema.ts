@@ -22,6 +22,7 @@ export const series = pgTable("series", {
   titulo: text("titulo").notNull(),
   imagem: text("imagem"),
   cor: text("cor"),
+  descricao: text("descricao"),
   createdAt: timestamp("created_at").defaultNow(),
 })
 

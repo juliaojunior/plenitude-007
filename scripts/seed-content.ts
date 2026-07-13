@@ -44,8 +44,8 @@ async function main() {
   }))
   const medsFromSeries: MeditacaoRow[] = loadSerieItens().map((m) => ({
     id: m.id, titulo: m.titulo, categoria: null, serieId: m.serieId,
-    urlAudio: m.urlAudio, textoBiblico: null, referencia: null, transcricao: null,
-    duracaoSegundos: m.duracaoSegundos,
+    urlAudio: m.urlAudio, textoBiblico: m.textoBiblico ?? null, referencia: m.referencia ?? null,
+    transcricao: m.transcricao ?? null, duracaoSegundos: m.duracaoSegundos,
   }))
   const allMeds = [...medsFromCategorias, ...medsFromSeries]
 
@@ -92,9 +92,10 @@ async function main() {
       titulo: s.titulo,
       imagem: s.imagem ?? null,
       cor: s.cor ?? null,
+      descricao: s.descricao ?? null,
     }).onConflictDoUpdate({
       target: series.id,
-      set: { titulo: s.titulo, imagem: s.imagem ?? null, cor: s.cor ?? null },
+      set: { titulo: s.titulo, imagem: s.imagem ?? null, cor: s.cor ?? null, descricao: s.descricao ?? null },
     })
   }
   console.log(`✓ Séries: ${seriesList.length} upserts`)

@@ -62,6 +62,10 @@ export default async function SeriePage({ params }: Props) {
         </div>
       </div>
 
+      {serie.descricao && (
+        <p className="mb-6 text-sm leading-relaxed text-[var(--text-muted)]">{serie.descricao}</p>
+      )}
+
       {itens.length === 0 ? (
         <div className="py-16 text-center">
           <p className="text-[var(--text-muted)]">Nenhuma meditação ainda.</p>

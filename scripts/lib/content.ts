@@ -56,6 +56,7 @@ export interface SerieEntry {
   titulo: string
   imagem?: string | null
   cor?: string | null
+  descricao?: string | null
 }
 
 export interface SerieItemEntry {
@@ -64,6 +65,9 @@ export interface SerieItemEntry {
   titulo: string
   urlAudio: string
   duracaoSegundos: number | null
+  textoBiblico?: string | null
+  referencia?: string | null
+  transcricao?: string | null
 }
 
 export function loadSeries(): SerieEntry[] {
