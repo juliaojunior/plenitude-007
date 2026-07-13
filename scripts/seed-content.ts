@@ -4,10 +4,22 @@ config({ path: ".env.local" })
 import { neon } from "@neondatabase/serverless"
 import { drizzle } from "drizzle-orm/neon-http"
 import * as schema from "../src/lib/db/schema"
-import { loadMana, loadMeditacoes, loadSons } from "./lib/content"
+import { loadMana, loadMeditacoes, loadSons, loadSeries, loadSerieItens } from "./lib/content"
 
 const db = drizzle(neon(process.env.DATABASE_URL!), { schema })
-const { manadiario, meditacoes, sons } = schema
+const { manadiario, meditacoes, sons, series } = schema
+
+type MeditacaoRow = {
+  id: string
+  titulo: string
+  categoria: string | null
+  serieId: string | null
+  urlAudio: string | null
+  textoBiblico: string | null
+  referencia: string | null
+  transcricao: string | null
+  duracaoSegundos: number | null
+}
 
 async function main() {
   const mana = loadMana()
@@ -25,27 +37,33 @@ async function main() {
   }
   console.log(`✓ Maná: ${mana.length} upserts`)
 
-  const meds = loadMeditacoes()
-  for (const m of meds) {
+  const medsFromCategorias: MeditacaoRow[] = loadMeditacoes().map((m) => ({
+    id: m.id, titulo: m.titulo, categoria: m.categoria, serieId: null,
+    urlAudio: m.urlAudio, textoBiblico: m.textoBiblico, referencia: m.referencia,
+    transcricao: m.transcricao, duracaoSegundos: m.duracaoSegundos,
+  }))
+  const medsFromSeries: MeditacaoRow[] = loadSerieItens().map((m) => ({
+    id: m.id, titulo: m.titulo, categoria: null, serieId: m.serieId,
+    urlAudio: m.urlAudio, textoBiblico: m.textoBiblico ?? null, referencia: m.referencia ?? null,
+    transcricao: m.transcricao ?? null, duracaoSegundos: m.duracaoSegundos,
+  }))
+  const allMeds = [...medsFromCategorias, ...medsFromSeries]
+
+  for (const m of allMeds) {
     await db.insert(meditacoes).values({
-      id: m.id,
-      titulo: m.titulo,
-      categoria: m.categoria,
-      urlAudio: m.urlAudio,
-      textoBiblico: m.textoBiblico,
-      referencia: m.referencia,
-      transcricao: m.transcricao,
-      duracaoSegundos: m.duracaoSegundos,
+      id: m.id, titulo: m.titulo, categoria: m.categoria, serieId: m.serieId,
+      urlAudio: m.urlAudio, textoBiblico: m.textoBiblico, referencia: m.referencia,
+      transcricao: m.transcricao, duracaoSegundos: m.duracaoSegundos,
     }).onConflictDoUpdate({
       target: meditacoes.id,
       set: {
-        titulo: m.titulo, categoria: m.categoria, urlAudio: m.urlAudio,
+        titulo: m.titulo, categoria: m.categoria, serieId: m.serieId, urlAudio: m.urlAudio,
         textoBiblico: m.textoBiblico, referencia: m.referencia,
         transcricao: m.transcricao, duracaoSegundos: m.duracaoSegundos, updatedAt: new Date(),
       },
     })
   }
-  console.log(`✓ Meditações: ${meds.length} upserts`)
+  console.log(`✓ Meditações: ${allMeds.length} upserts (${medsFromCategorias.length} por categoria, ${medsFromSeries.length} de séries)`)
 
   const somsList = loadSons()
   for (const s of somsList) {
@@ -66,5 +84,20 @@ async function main() {
     })
   }
   console.log(`✓ Sons: ${somsList.length} upserts`)
+
+  const seriesList = loadSeries()
+  for (const s of seriesList) {
+    await db.insert(series).values({
+      id: s.id,
+      titulo: s.titulo,
+      imagem: s.imagem ?? null,
+      cor: s.cor ?? null,
+      descricao: s.descricao ?? null,
+    }).onConflictDoUpdate({
+      target: series.id,
+      set: { titulo: s.titulo, imagem: s.imagem ?? null, cor: s.cor ?? null, descricao: s.descricao ?? null },
+    })
+  }
+  console.log(`✓ Séries: ${seriesList.length} upserts`)
 }
 main().catch((e) => { console.error(e); process.exit(1) })
