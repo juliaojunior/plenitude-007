@@ -1,6 +1,7 @@
 "use client"
 
-import { useLayoutEffect, useRef } from "react"
+import { Children, cloneElement, isValidElement, useLayoutEffect, useRef } from "react"
+import type { ReactElement, ReactNode } from "react"
 
 const SPEED_PX_PER_SECOND = 24
 
@@ -17,11 +18,16 @@ const SPEED_PX_PER_SECOND = 24
  * both directions and an auto-advance with no visible reset, instead of
  * snapping back to 0 at the end of the list.
  *
- * The 3 copies are NOT marked `inert`/`aria-hidden`: that was tried and
- * broke tap-to-navigate, because the viewport starts positioned over the
- * *second* copy and drifts across all three as it scrolls, so disabling any
- * copy disables clicks on whatever the user is currently looking at. Known
- * trade-off: keyboard Tab order and screen readers see 3x duplicate links.
+ * Only the first copy is reachable by keyboard/screen reader (its items are
+ * the real, primary ones); the other two are marked `aria-hidden` +
+ * `tabIndex={-1}` per item so Tab and assistive tech encounter each
+ * category/sound once, not 3 times. `inert` was tried instead and broke
+ * mouse/touch clicks on those copies — `inert` disables hit-testing on the
+ * whole subtree, not just keyboard/AT reachability, and since the viewport
+ * starts over the *second* copy and drifts across all three as it scrolls,
+ * that disabled clicks on whatever the user was currently looking at.
+ * `aria-hidden`+`tabIndex={-1}` only affects focus order and the
+ * accessibility tree, so pointer clicks keep working on every copy.
  *
  * Auto-advance moves by elapsed time (not a fixed per-frame pixel step) so
  * it isn't lost to the browser's scroll-position rounding, and is skipped
@@ -29,6 +35,19 @@ const SPEED_PX_PER_SECOND = 24
  * actively touching/dragging; manual scroll always works and wraps the same
  * way via the scroll listener.
  */
+type FocusableProps = { "aria-hidden"?: boolean; tabIndex?: number }
+
+// Duplicate copies are visual-only: hide each item from Tab order and
+// assistive tech without touching pointer/click behavior (unlike `inert`,
+// which would disable clicks too — see the component doc comment).
+function forDuplicateCopy(children: ReactNode) {
+  return Children.map(children, (child) =>
+    isValidElement(child)
+      ? cloneElement(child as ReactElement<FocusableProps>, { "aria-hidden": true, tabIndex: -1 })
+      : child
+  )
+}
+
 export function Carousel({ children }: { children: React.ReactNode }) {
   const scrollerRef = useRef<HTMLDivElement>(null)
   const firstSetRef = useRef<HTMLDivElement>(null)
@@ -97,8 +116,8 @@ export function Carousel({ children }: { children: React.ReactNode }) {
       className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       <div ref={firstSetRef} className="flex shrink-0 gap-4">{children}</div>
-      <div ref={secondSetRef} className="flex shrink-0 gap-4">{children}</div>
-      <div className="flex shrink-0 gap-4">{children}</div>
+      <div ref={secondSetRef} className="flex shrink-0 gap-4">{forDuplicateCopy(children)}</div>
+      <div className="flex shrink-0 gap-4">{forDuplicateCopy(children)}</div>
     </div>
   )
 }
