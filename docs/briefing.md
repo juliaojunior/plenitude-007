@@ -48,3 +48,13 @@ Na tela de meditação individual (`/meditacoes/[categoria]/[id]`), a transcriç
 - **Corte de crossfade nas músicas:** ainda não ouvi os 2 arquivos de música pra confirmar se o corte cai de forma perceptível no meio de uma frase melódica — pedir pro usuário conferir ao ouvir (ver resumo da conversa).
 - Imagens dos cards continuam reaproveitando os `.webp` de categoria já existentes como placeholder (mesma prática já usada nos 3 sons antigos) — ícones definitivos ficam pra depois.
 - **Não rodei `npm run content:seed`** — mudança fica só no JSON, commitada na branch, aguardando o usuário ouvir os áudios e aprovar.
+
+## Publicação dos 8 sons/músicas aprovados (2026-07-14)
+
+Usuário ouviu os 8 áudios (6 ambiente + 2 música) e aprovou todos, sem ressalvas — incluindo o tratamento de loop e o corte de crossfade nas músicas.
+
+Adicionada a coluna `tipo` (text, nullable) à tabela `sons` no Neon via `db:push`, e `scripts/seed-content.ts` passou a gravá-la — decisão do usuário, pra deixar o campo persistido no banco (antes só existia em `content/sons.json`/`scripts/generate-sons.ts`). Rodado `npm run content:seed`: os 8 itens novos entraram/atualizaram na tabela `sons` com `urlAudio`, `duracaoSegundos` e `tipo` corretos, confirmado via query direta no Neon. Os 2 placeholders antigos (`som-brisa`, `som-silencio-orante`) permaneceram intocados (`tipo` null), sem duplicar nada — não faziam parte do lote aprovado.
+
+Branch `content/sons-elevenlabs` mesclada em `main` (merge normal, histórico preservado, sem squash) e enviada pro GitHub, disparando o deploy de produção (commit `0175681`). Build local (`npm run build`) e deploy na Vercel concluídos sem erro.
+
+**Pendente:** ícones/imagens definitivos dos 8 cards — continuam reaproveitando os `.webp` de categoria como placeholder, aguardando as artes do usuário.
