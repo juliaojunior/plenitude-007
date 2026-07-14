@@ -7,13 +7,21 @@ const SPEED_PX_PER_SECOND = 24
 /**
  * Horizontal auto-advancing carousel with a seamless infinite loop.
  *
- * `children` is rendered 3 times back to back (real copy + two inert
- * duplicates) so there's always identical content ahead of and behind the
- * visible frame. The scroll position starts in the middle copy and wraps by
- * exactly one copy's width ("period") whenever it drifts into a neighboring
- * copy — since that copy is pixel-identical, the jump is invisible. This
- * gives infinite-feeling drag in both directions and an auto-advance with no
- * visible reset, instead of snapping back to 0 at the end of the list.
+ * `children` is rendered 3 times back to back (three equally "real" copies —
+ * whichever one is in view at a given moment must stay clickable, since the
+ * visible frame is never pinned to a single copy) so there's always
+ * identical content ahead of and behind the visible frame. The scroll
+ * position starts in the middle copy and wraps by exactly one copy's width
+ * ("period") whenever it drifts into a neighboring copy — since that copy is
+ * pixel-identical, the jump is invisible. This gives infinite-feeling drag in
+ * both directions and an auto-advance with no visible reset, instead of
+ * snapping back to 0 at the end of the list.
+ *
+ * The 3 copies are NOT marked `inert`/`aria-hidden`: that was tried and
+ * broke tap-to-navigate, because the viewport starts positioned over the
+ * *second* copy and drifts across all three as it scrolls, so disabling any
+ * copy disables clicks on whatever the user is currently looking at. Known
+ * trade-off: keyboard Tab order and screen readers see 3x duplicate links.
  *
  * Auto-advance moves by elapsed time (not a fixed per-frame pixel step) so
  * it isn't lost to the browser's scroll-position rounding, and is skipped
@@ -89,8 +97,8 @@ export function Carousel({ children }: { children: React.ReactNode }) {
       className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       <div ref={firstSetRef} className="flex shrink-0 gap-4">{children}</div>
-      <div ref={secondSetRef} className="flex shrink-0 gap-4" inert aria-hidden>{children}</div>
-      <div className="flex shrink-0 gap-4" inert aria-hidden>{children}</div>
+      <div ref={secondSetRef} className="flex shrink-0 gap-4">{children}</div>
+      <div className="flex shrink-0 gap-4">{children}</div>
     </div>
   )
 }
