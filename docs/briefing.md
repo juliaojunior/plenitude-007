@@ -84,3 +84,11 @@ Pausa em touch/drag e `prefers-reduced-motion` continuam intactos; o listener de
 **Fix:** removido `inert`/`aria-hidden` das 3 cópias — todas ficam igualmente clicáveis, já que qualquer uma pode estar em vista a qualquer momento. **Trade-off aceito, fora do escopo deste fix:** ordem de Tab e leitor de tela veem os mesmos links 3x — limitação conhecida da técnica de duplicar DOM pra loop infinito, não introduzida por esta correção especificamente (já existiria com qualquer abordagem de duplicação sem uma solução de a11y dedicada, que não foi pedida aqui).
 
 **Pendente:** aprovação visual do usuário no preview (clique, arraste e auto-avanço juntos) antes do merge.
+
+## Fix — Acessibilidade das cópias duplicadas (2026-07-14)
+
+**Branch:** `fix/carrossel-loop-infinito` (continuação, mesma branch, ainda sem merge).
+
+O fix anterior tornou as 3 cópias totalmente acessíveis (sem `inert`, sem `aria-hidden`) pra resolver o clique — mas isso fazia Tab e leitor de tela encontrarem cada categoria/som 3 vezes seguidas. Correção, só em `src/components/carousel.tsx` (não mexeu em `categorias-carrossel.tsx`/`sons-carrossel.tsx`, cobre os dois automaticamente): as 2 cópias duplicadas (visuais, pro loop) agora clonam cada item via `React.Children.map`+`cloneElement`, adicionando `aria-hidden="true"` e `tabIndex={-1}` — tira as duplicatas do Tab e da árvore de acessibilidade sem usar `inert` (que desliga hit-testing e foi o que quebrou o clique da vez passada). `aria-hidden`/`tabIndex` só afetam foco e a árvore a11y; clique por mouse/toque continua funcionando nas 3 cópias. Validado com um teste isolado de `cloneElement` em Node (usando o `react` já instalado, sem framework de teste novo): aria-hidden/tabIndex aplicados, props originais preservadas, original não mutado.
+
+**Pendente:** aprovação visual do usuário — clique, Tab (uma vez só por item), arraste e auto-avanço juntos — antes do merge.
