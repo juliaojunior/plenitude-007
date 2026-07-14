@@ -10,24 +10,6 @@
     "tipo": "ambiente"
   },
   {
-    "id": "som-brisa",
-    "titulo": "Brisa Calma",
-    "urlAudio": "https://hfhfrda6ggx58ctr.public.blob.vercel-storage.com/audio/med-paz-1.mp3",
-    "duracaoSegundos": 325,
-    "imagem": "/categorias/paz.webp",
-    "cor": "#7B6FA0",
-    "descricao": "Placeholder — trocar pelo áudio real de brisa/vento."
-  },
-  {
-    "id": "som-silencio-orante",
-    "titulo": "Silêncio Orante",
-    "urlAudio": "https://hfhfrda6ggx58ctr.public.blob.vercel-storage.com/audio/med-foco-1.mp3",
-    "duracaoSegundos": 207,
-    "imagem": "/categorias/foco.webp",
-    "cor": "#8B5E3C",
-    "descricao": "Placeholder — trocar pelo áudio real de fundo instrumental."
-  },
-  {
     "id": "som-ondas-mar",
     "titulo": "Ondas do Mar",
     "urlAudio": "https://hfhfrda6ggx58ctr.public.blob.vercel-storage.com/audio/som-ondas-mar.mp3",
