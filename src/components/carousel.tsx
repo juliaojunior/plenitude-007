@@ -17,13 +17,26 @@ export function Carousel({ children }: { children: React.ReactNode }) {
     if (!scroller) return
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
 
-    const SPEED_PX_PER_FRAME = 0.4
+    const SPEED_PX_PER_SECOND = 24
+    // Tracked separately from scroller.scrollLeft: browsers quantize the
+    // scroll position, so re-reading it each frame and adding a sub-pixel
+    // delta (24px/s ÷ 60fps ≈ 0.4px) silently loses the increment to
+    // rounding and the carousel never visibly moves.
+    let position = scroller.scrollLeft
+    let lastTime = performance.now()
     let raf: number
 
-    const tick = () => {
-      if (!pausedRef.current) {
-        const atEnd = scroller.scrollLeft + scroller.clientWidth >= scroller.scrollWidth - 1
-        scroller.scrollLeft = atEnd ? 0 : scroller.scrollLeft + SPEED_PX_PER_FRAME
+    const tick = (now: number) => {
+      const dt = now - lastTime
+      lastTime = now
+      if (pausedRef.current) {
+        // Resync after a manual drag so playback continues from there.
+        position = scroller.scrollLeft
+      } else {
+        const maxScroll = scroller.scrollWidth - scroller.clientWidth
+        position += (SPEED_PX_PER_SECOND * dt) / 1000
+        if (position >= maxScroll) position = 0
+        scroller.scrollLeft = position
       }
       raf = requestAnimationFrame(tick)
     }
