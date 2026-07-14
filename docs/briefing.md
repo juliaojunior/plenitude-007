@@ -92,3 +92,11 @@ Pausa em touch/drag e `prefers-reduced-motion` continuam intactos; o listener de
 O fix anterior tornou as 3 cópias totalmente acessíveis (sem `inert`, sem `aria-hidden`) pra resolver o clique — mas isso fazia Tab e leitor de tela encontrarem cada categoria/som 3 vezes seguidas. Correção, só em `src/components/carousel.tsx` (não mexeu em `categorias-carrossel.tsx`/`sons-carrossel.tsx`, cobre os dois automaticamente): as 2 cópias duplicadas (visuais, pro loop) agora clonam cada item via `React.Children.map`+`cloneElement`, adicionando `aria-hidden="true"` e `tabIndex={-1}` — tira as duplicatas do Tab e da árvore de acessibilidade sem usar `inert` (que desliga hit-testing e foi o que quebrou o clique da vez passada). `aria-hidden`/`tabIndex` só afetam foco e a árvore a11y; clique por mouse/toque continua funcionando nas 3 cópias. Validado com um teste isolado de `cloneElement` em Node (usando o `react` já instalado, sem framework de teste novo): aria-hidden/tabIndex aplicados, props originais preservadas, original não mutado.
 
 **Pendente:** aprovação visual do usuário — clique, Tab (uma vez só por item), arraste e auto-avanço juntos — antes do merge.
+
+## Imagens definitivas das 11 séries (2026-07-14)
+
+**Branch:** `content/imagens-series` (a partir de `main`, sem merge — aguardando conferência visual do usuário nos 11 cards antes do merge).
+
+Os 11 arquivos entregues em `public/series/` (nome = título da série, ex. `Gravidez.png`, `está tudo bem.png`, `Histórias bíblicas.png`) casaram 1:1 e sem ambiguidade com as 11 séries de `content/series.json` (comparação por título, ignorando maiúsculas/acentos/espaço vs. hífen). Convertidos pra `.webp` com ImageMagick (`magick -resize 480x480^ -gravity center -extent 480x480 -quality 82`), mesmo padrão 480×480 já usado em `public/categorias/`, e renomeados pro slug do id da série sem o prefixo `serie-` (ex. `serie-esta-tudo-bem` → `esta-tudo-bem.webp`). Campo `imagem` de cada série em `content/series.json` atualizado para `/series/<slug>.webp`; `npm run content:seed` rodado e confirmado por query direta: as 11 linhas da tabela `series` têm `imagem` preenchida, nenhuma faltando.
+
+**Pendente:** conferência visual do usuário nos 11 cards da home/tela de séries antes do merge em `main`.
