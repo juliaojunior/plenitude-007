@@ -62,3 +62,15 @@ Branch `content/sons-elevenlabs` mesclada em `main` (merge normal, histórico pr
 ## Remoção dos placeholders de som (2026-07-14)
 
 Removidas as entradas `som-brisa` e `som-silencio-orante` de `content/sons.json` (Sprint 1, nunca substituídas pelos áudios reais). `npm run content:seed` é upsert-only — não remove do banco linhas que saíram do JSON —, então as 2 linhas foram apagadas com `DELETE` direto na tabela `sons` de produção (Neon), sem tabela relacionada afetada (sons não são favoritáveis). Confirmado por query: tabela `sons` agora tem só os 8 itens reais (6 `ambiente` + 2 `musica`). Branch `chore/remove-sons-placeholder` mesclada em `main` (merge normal) e deploy de produção disparado.
+
+## Fix — Auto-avanço dos carrosséis não se movia (2026-07-14)
+
+**Branch:** `fix/carrossel-auto-scroll` (a partir de `main`, sem merge — aguardando aprovação visual do usuário no preview).
+
+**Investigação:** `git log` confirma que `src/components/carousel.tsx`, `categorias-carrossel.tsx` e `sons-carrossel.tsx` nunca foram alterados desde a criação (Sprint 1, `e754761`, mais o ajuste de tremido `ab7bb66`) — o merge de `feat/series-grade` não toca nesses arquivos, então não foi uma regressão de merge.
+
+**Causa raiz:** o loop de auto-avanço lia `scroller.scrollLeft` de volta a cada frame e somava `0.4px` (`scroller.scrollLeft = scroller.scrollLeft + 0.4`). Navegadores quantizam a posição de scroll internamente; um incremento menor que 1px por frame é sistematicamente perdido no arredondamento antes de se acumular — confirmado empiricamente (200 incrementos sucessivos de 0.4 resultaram em ~10px acumulados, não os 80px esperados). O carrossel nunca avançava de verdade, só parecia parado; arrastar manualmente sempre funcionou porque não depende dessa lógica. Bug latente desde a implementação original, nunca validado visualmente pela sessão que implementou (a nota da Sprint 1 já registrava que o teste visual logado não foi possível localmente).
+
+**Fix:** posição acumulada num float local (independente do que `scrollLeft` reporta de volta) e avanço por delta de tempo (`performance.now()`) em vez de incremento fixo por frame — mesma velocidade percebida (24px/s), agora imune à quantização e a variações de frame rate. Resincroniza com o `scrollLeft` real ao soltar o arrasto manual. Pausa em touch/drag e o respeito a `prefers-reduced-motion` não foram alterados. Validado com uma simulação isolada da lógica em Node (sem depender de renderização real, já que testar visualmente via automação de navegador não foi possível — a aba fica sempre "hidden" pro navegador, o que suspende `requestAnimationFrame`).
+
+**Pendente:** aprovação visual do usuário no preview antes do merge.
