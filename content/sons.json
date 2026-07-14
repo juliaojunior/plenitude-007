@@ -2,11 +2,12 @@
   {
     "id": "som-chuva",
     "titulo": "Chuva Suave",
-    "urlAudio": "https://hfhfrda6ggx58ctr.public.blob.vercel-storage.com/audio/med-sono-1.mp3",
-    "duracaoSegundos": 584,
+    "urlAudio": "https://hfhfrda6ggx58ctr.public.blob.vercel-storage.com/audio/som-chuva.mp3",
+    "duracaoSegundos": 26,
     "imagem": "/categorias/sono.webp",
     "cor": "#3D5A80",
-    "descricao": "Placeholder — trocar pelo áudio real de chuva suave."
+    "descricao": "Chuva suave e contínua, ideal para relaxar ou dormir.",
+    "tipo": "ambiente"
   },
   {
     "id": "som-brisa",
@@ -25,5 +26,75 @@
     "imagem": "/categorias/foco.webp",
     "cor": "#8B5E3C",
     "descricao": "Placeholder — trocar pelo áudio real de fundo instrumental."
+  },
+  {
+    "id": "som-ondas-mar",
+    "titulo": "Ondas do Mar",
+    "urlAudio": "https://hfhfrda6ggx58ctr.public.blob.vercel-storage.com/audio/som-ondas-mar.mp3",
+    "duracaoSegundos": 25,
+    "imagem": "/categorias/paz.webp",
+    "cor": "#2E6F7E",
+    "descricao": "Ondas calmas quebrando na praia, ritmo lento e sereno.",
+    "tipo": "ambiente"
+  },
+  {
+    "id": "som-floresta-amanhecer",
+    "titulo": "Floresta ao Amanhecer",
+    "urlAudio": "https://hfhfrda6ggx58ctr.public.blob.vercel-storage.com/audio/som-floresta-amanhecer.mp3",
+    "duracaoSegundos": 24,
+    "imagem": "/categorias/esperanca.webp",
+    "cor": "#4E7C59",
+    "descricao": "Floresta tranquila ao amanhecer, com pássaros ao longe.",
+    "tipo": "ambiente"
+  },
+  {
+    "id": "som-riacho-suave",
+    "titulo": "Riacho Suave",
+    "urlAudio": "https://hfhfrda6ggx58ctr.public.blob.vercel-storage.com/audio/som-riacho-suave.mp3",
+    "duracaoSegundos": 28,
+    "imagem": "/categorias/foco.webp",
+    "cor": "#3D8296",
+    "descricao": "Riacho manso sobre pedras lisas, água borbulhante e contínua.",
+    "tipo": "ambiente"
+  },
+  {
+    "id": "som-brisa-noturna",
+    "titulo": "Brisa Noturna",
+    "urlAudio": "https://hfhfrda6ggx58ctr.public.blob.vercel-storage.com/audio/som-brisa-noturna.mp3",
+    "duracaoSegundos": 24,
+    "imagem": "/categorias/sono.webp",
+    "cor": "#1F2A4A",
+    "descricao": "Brisa noturna suave e minimalista, ideal para dormir.",
+    "tipo": "ambiente"
+  },
+  {
+    "id": "som-sinos-cristal",
+    "titulo": "Sinos de Cristal",
+    "urlAudio": "https://hfhfrda6ggx58ctr.public.blob.vercel-storage.com/audio/som-sinos-cristal.mp3",
+    "duracaoSegundos": 26,
+    "imagem": "/categorias/sabedoria.webp",
+    "cor": "#8B5E9E",
+    "descricao": "Tigela de cristal, toques lentos e ressonantes, tons meditativos.",
+    "tipo": "ambiente"
+  },
+  {
+    "id": "som-piano-suave",
+    "titulo": "Piano Suave",
+    "urlAudio": "https://hfhfrda6ggx58ctr.public.blob.vercel-storage.com/audio/som-piano-suave.mp3",
+    "duracaoSegundos": 177,
+    "imagem": "/categorias/paz.webp",
+    "cor": "#6B5B95",
+    "descricao": "Melodia instrumental de piano, lenta e meditativa, sem vocais.",
+    "tipo": "musica"
+  },
+  {
+    "id": "som-cordas-ambiente",
+    "titulo": "Cordas Ambiente",
+    "urlAudio": "https://hfhfrda6ggx58ctr.public.blob.vercel-storage.com/audio/som-cordas-ambiente.mp3",
+    "duracaoSegundos": 170,
+    "imagem": "/categorias/sabedoria.webp",
+    "cor": "#4A6670",
+    "descricao": "Pad de cordas sustentadas, textura ambiente quente para meditação.",
+    "tipo": "musica"
   }
 ]

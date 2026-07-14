@@ -37,6 +37,7 @@ export interface SomEntry {
   imagem: string | null
   cor: string | null
   descricao: string | null
+  tipo?: "ambiente" | "musica"
 }
 
 const root = resolve(process.cwd(), "content")
