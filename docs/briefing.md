@@ -74,3 +74,13 @@ Esse arquivo também absorve o fix de sub-pixel da branch `fix/carrossel-auto-sc
 Pausa em touch/drag e `prefers-reduced-motion` continuam intactos; o listener de wrap por scroll fica ativo mesmo com reduced-motion ligado, pra o arrasto manual continuar funcionando sem comportamento estranho nas bordas mesmo sem auto-avanço.
 
 **Pendente:** aprovação visual do usuário no preview antes do merge.
+
+## Fix — Clique nos cards quebrado após o loop infinito (2026-07-14)
+
+**Branch:** `fix/carrossel-loop-infinito` (continuação do fix acima, mesma branch, ainda sem merge).
+
+**Causa raiz:** o fix do loop infinito marcava as cópias 2 e 3 (das 3 duplicatas de `children`) com `inert`+`aria-hidden`, assumindo que só a cópia 1 precisava ser clicável. Só que a posição inicial do scroll (`period`) começa exatamente no início da cópia 2, e o auto-avanço/arrasto passeia livremente pelas 3 cópias — ou seja, o conteúdo visível quase nunca é a cópia 1. `inert` desabilita clique/foco/hit-testing no subtree inteiro, então qualquer card visível (cópia 2 ou 3, o caso comum) ficava morto ao toque. Não era gesto de arrastar capturando o toque (não há handler de Framer Motion nem `preventDefault` em lugar nenhum) nem overlay com `pointer-events` — as 3 cópias são só divs flex lado a lado.
+
+**Fix:** removido `inert`/`aria-hidden` das 3 cópias — todas ficam igualmente clicáveis, já que qualquer uma pode estar em vista a qualquer momento. **Trade-off aceito, fora do escopo deste fix:** ordem de Tab e leitor de tela veem os mesmos links 3x — limitação conhecida da técnica de duplicar DOM pra loop infinito, não introduzida por esta correção especificamente (já existiria com qualquer abordagem de duplicação sem uma solução de a11y dedicada, que não foi pedida aqui).
+
+**Pendente:** aprovação visual do usuário no preview (clique, arraste e auto-avanço juntos) antes do merge.
