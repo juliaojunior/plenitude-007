@@ -62,3 +62,33 @@ Branch `content/sons-elevenlabs` mesclada em `main` (merge normal, histórico pr
 ## Remoção dos placeholders de som (2026-07-14)
 
 Removidas as entradas `som-brisa` e `som-silencio-orante` de `content/sons.json` (Sprint 1, nunca substituídas pelos áudios reais). `npm run content:seed` é upsert-only — não remove do banco linhas que saíram do JSON —, então as 2 linhas foram apagadas com `DELETE` direto na tabela `sons` de produção (Neon), sem tabela relacionada afetada (sons não são favoritáveis). Confirmado por query: tabela `sons` agora tem só os 8 itens reais (6 `ambiente` + 2 `musica`). Branch `chore/remove-sons-placeholder` mesclada em `main` (merge normal) e deploy de produção disparado.
+
+## Fix — Loop infinito dos carrosséis sem salto visual (2026-07-14)
+
+**Branch:** `fix/carrossel-loop-infinito` (a partir de `main`, sem merge — aguardando aprovação visual do usuário no preview).
+
+Antes, o auto-avanço chegava no fim da lista de itens e resetava `scrollLeft` pra `0` de forma abrupta — um corte visível, não um loop contínuo. Técnica aplicada em `src/components/carousel.tsx`: `children` é renderizado **3 vezes** (cópia real + 2 duplicatas marcadas `inert`+`aria-hidden`, invisíveis a teclado/leitor de tela), começando na cópia do meio para dar margem de arrasto nos dois sentidos. Um "período" (largura de uma cópia + o gap até a próxima) é **medido** via `getBoundingClientRect()` entre o início da cópia 1 e da cópia 2 — não assume um valor fixo de gap/largura. Sempre que a posição ultrapassa `2×período` (auto-avanço) ou os limites via scroll manual, ela é ajustada somando/subtraindo exatamente 1 período; como o conteúdo ali é idêntico (é a cópia duplicada), o ajuste é instantâneo e imperceptível — nenhuma transição nesse instante.
+
+Esse arquivo também absorve o fix de sub-pixel da branch `fix/carrossel-auto-scroll` (ainda não mesclada): o incremento por frame virou delta de tempo (`performance.now()`), necessário pra qualquer movimento contínuo funcionar de verdade. **Atenção ao mesclar as duas branches em `main`:** pode haver conflito trivial em `carousel.tsx`, já que este arquivo aqui contém as duas correções combinadas — a branch mais antiga pode ficar redundante depois que esta for mesclada.
+
+Pausa em touch/drag e `prefers-reduced-motion` continuam intactos; o listener de wrap por scroll fica ativo mesmo com reduced-motion ligado, pra o arrasto manual continuar funcionando sem comportamento estranho nas bordas mesmo sem auto-avanço.
+
+**Pendente:** aprovação visual do usuário no preview antes do merge.
+
+## Fix — Clique nos cards quebrado após o loop infinito (2026-07-14)
+
+**Branch:** `fix/carrossel-loop-infinito` (continuação do fix acima, mesma branch, ainda sem merge).
+
+**Causa raiz:** o fix do loop infinito marcava as cópias 2 e 3 (das 3 duplicatas de `children`) com `inert`+`aria-hidden`, assumindo que só a cópia 1 precisava ser clicável. Só que a posição inicial do scroll (`period`) começa exatamente no início da cópia 2, e o auto-avanço/arrasto passeia livremente pelas 3 cópias — ou seja, o conteúdo visível quase nunca é a cópia 1. `inert` desabilita clique/foco/hit-testing no subtree inteiro, então qualquer card visível (cópia 2 ou 3, o caso comum) ficava morto ao toque. Não era gesto de arrastar capturando o toque (não há handler de Framer Motion nem `preventDefault` em lugar nenhum) nem overlay com `pointer-events` — as 3 cópias são só divs flex lado a lado.
+
+**Fix:** removido `inert`/`aria-hidden` das 3 cópias — todas ficam igualmente clicáveis, já que qualquer uma pode estar em vista a qualquer momento. **Trade-off aceito, fora do escopo deste fix:** ordem de Tab e leitor de tela veem os mesmos links 3x — limitação conhecida da técnica de duplicar DOM pra loop infinito, não introduzida por esta correção especificamente (já existiria com qualquer abordagem de duplicação sem uma solução de a11y dedicada, que não foi pedida aqui).
+
+**Pendente:** aprovação visual do usuário no preview (clique, arraste e auto-avanço juntos) antes do merge.
+
+## Fix — Acessibilidade das cópias duplicadas (2026-07-14)
+
+**Branch:** `fix/carrossel-loop-infinito` (continuação, mesma branch, ainda sem merge).
+
+O fix anterior tornou as 3 cópias totalmente acessíveis (sem `inert`, sem `aria-hidden`) pra resolver o clique — mas isso fazia Tab e leitor de tela encontrarem cada categoria/som 3 vezes seguidas. Correção, só em `src/components/carousel.tsx` (não mexeu em `categorias-carrossel.tsx`/`sons-carrossel.tsx`, cobre os dois automaticamente): as 2 cópias duplicadas (visuais, pro loop) agora clonam cada item via `React.Children.map`+`cloneElement`, adicionando `aria-hidden="true"` e `tabIndex={-1}` — tira as duplicatas do Tab e da árvore de acessibilidade sem usar `inert` (que desliga hit-testing e foi o que quebrou o clique da vez passada). `aria-hidden`/`tabIndex` só afetam foco e a árvore a11y; clique por mouse/toque continua funcionando nas 3 cópias. Validado com um teste isolado de `cloneElement` em Node (usando o `react` já instalado, sem framework de teste novo): aria-hidden/tabIndex aplicados, props originais preservadas, original não mutado.
+
+**Pendente:** aprovação visual do usuário — clique, Tab (uma vez só por item), arraste e auto-avanço juntos — antes do merge.
