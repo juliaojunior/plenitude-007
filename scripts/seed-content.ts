@@ -75,11 +75,12 @@ async function main() {
       imagem: s.imagem,
       cor: s.cor,
       descricao: s.descricao,
+      tipo: s.tipo ?? null,
     }).onConflictDoUpdate({
       target: sons.id,
       set: {
         titulo: s.titulo, urlAudio: s.urlAudio, duracaoSegundos: s.duracaoSegundos,
-        imagem: s.imagem, cor: s.cor, descricao: s.descricao, updatedAt: new Date(),
+        imagem: s.imagem, cor: s.cor, descricao: s.descricao, tipo: s.tipo ?? null, updatedAt: new Date(),
       },
     })
   }

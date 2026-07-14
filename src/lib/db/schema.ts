@@ -49,6 +49,7 @@ export const sons = pgTable("sons", {
   imagem: text("imagem"),
   cor: text("cor"),
   descricao: text("descricao"),
+  tipo: text("tipo"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 })
