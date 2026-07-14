@@ -58,3 +58,7 @@ Adicionada a coluna `tipo` (text, nullable) à tabela `sons` no Neon via `db:pus
 Branch `content/sons-elevenlabs` mesclada em `main` (merge normal, histórico preservado, sem squash) e enviada pro GitHub, disparando o deploy de produção (commit `0175681`). Build local (`npm run build`) e deploy na Vercel concluídos sem erro.
 
 **Pendente:** ícones/imagens definitivos dos 8 cards — continuam reaproveitando os `.webp` de categoria como placeholder, aguardando as artes do usuário.
+
+## Remoção dos placeholders de som (2026-07-14)
+
+Removidas as entradas `som-brisa` e `som-silencio-orante` de `content/sons.json` (Sprint 1, nunca substituídas pelos áudios reais). `npm run content:seed` é upsert-only — não remove do banco linhas que saíram do JSON —, então as 2 linhas foram apagadas com `DELETE` direto na tabela `sons` de produção (Neon), sem tabela relacionada afetada (sons não são favoritáveis). Confirmado por query: tabela `sons` agora tem só os 8 itens reais (6 `ambiente` + 2 `musica`). Branch `chore/remove-sons-placeholder` mesclada em `main` (merge normal) e deploy de produção disparado.
