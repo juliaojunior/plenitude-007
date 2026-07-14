@@ -62,3 +62,15 @@ Branch `content/sons-elevenlabs` mesclada em `main` (merge normal, histórico pr
 ## Remoção dos placeholders de som (2026-07-14)
 
 Removidas as entradas `som-brisa` e `som-silencio-orante` de `content/sons.json` (Sprint 1, nunca substituídas pelos áudios reais). `npm run content:seed` é upsert-only — não remove do banco linhas que saíram do JSON —, então as 2 linhas foram apagadas com `DELETE` direto na tabela `sons` de produção (Neon), sem tabela relacionada afetada (sons não são favoritáveis). Confirmado por query: tabela `sons` agora tem só os 8 itens reais (6 `ambiente` + 2 `musica`). Branch `chore/remove-sons-placeholder` mesclada em `main` (merge normal) e deploy de produção disparado.
+
+## Fix — Loop infinito dos carrosséis sem salto visual (2026-07-14)
+
+**Branch:** `fix/carrossel-loop-infinito` (a partir de `main`, sem merge — aguardando aprovação visual do usuário no preview).
+
+Antes, o auto-avanço chegava no fim da lista de itens e resetava `scrollLeft` pra `0` de forma abrupta — um corte visível, não um loop contínuo. Técnica aplicada em `src/components/carousel.tsx`: `children` é renderizado **3 vezes** (cópia real + 2 duplicatas marcadas `inert`+`aria-hidden`, invisíveis a teclado/leitor de tela), começando na cópia do meio para dar margem de arrasto nos dois sentidos. Um "período" (largura de uma cópia + o gap até a próxima) é **medido** via `getBoundingClientRect()` entre o início da cópia 1 e da cópia 2 — não assume um valor fixo de gap/largura. Sempre que a posição ultrapassa `2×período` (auto-avanço) ou os limites via scroll manual, ela é ajustada somando/subtraindo exatamente 1 período; como o conteúdo ali é idêntico (é a cópia duplicada), o ajuste é instantâneo e imperceptível — nenhuma transição nesse instante.
+
+Esse arquivo também absorve o fix de sub-pixel da branch `fix/carrossel-auto-scroll` (ainda não mesclada): o incremento por frame virou delta de tempo (`performance.now()`), necessário pra qualquer movimento contínuo funcionar de verdade. **Atenção ao mesclar as duas branches em `main`:** pode haver conflito trivial em `carousel.tsx`, já que este arquivo aqui contém as duas correções combinadas — a branch mais antiga pode ficar redundante depois que esta for mesclada.
+
+Pausa em touch/drag e `prefers-reduced-motion` continuam intactos; o listener de wrap por scroll fica ativo mesmo com reduced-motion ligado, pra o arrasto manual continuar funcionando sem comportamento estranho nas bordas mesmo sem auto-avanço.
+
+**Pendente:** aprovação visual do usuário no preview antes do merge.
