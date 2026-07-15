@@ -177,3 +177,23 @@ Rota `/` agora mostra uma landing page pra visitantes deslogados (antes redireci
 **Verificação:** `npx tsc --noEmit` limpo, `npm run lint` limpo (só o warning pré-existente não relacionado em `notificacoes.ts`), `npm run build` completo com sucesso (`/` aparece na lista de rotas). Testado com `npm run dev`: HTML confirma o placeholder da headline (dividido em spans pela animação palavra-a-palavra), links `/sign-in` e `/sign-up`, e o `<title>` com o placeholder de SEO.
 
 **Spec e plano completos:** `docs/superpowers/specs/2026-07-15-landing-page-design.md` e `docs/superpowers/plans/2026-07-15-landing-page.md`.
+
+## Narração real das 44 meditações de série via ElevenLabs (2026-07-15)
+
+**Branch:** `content/audio-series-elevenlabs` (a partir de `main`, sem merge — aguardando o usuário aprovar as amostras antes de rodar `content:seed`).
+
+As 55 meditações exclusivas de série (`content/series-itens.json`) usavam um áudio placeholder compartilhado (`med-paz-1.mp3`, o mesmo mp3 reaproveitado em todas). Geradas as narrações reais para as **44 meditações das 9 séries ativas** (as duas séries com `ativa: false` — Compaixão e Primeiros passos — ficaram de fora desta rodada, por pedido do usuário).
+
+**Pipeline reutilizado:** mesmo `voice_id` (`ZP7ctTmcovXNUmOj695o`) e modelo (`eleven_v3`) usados nas 18 meditações originais, encontrados em `scripts/generate-audio.ts` + `.env.local`. Sem `voice_settings` explícito (só é enviado quando o modelo não é `eleven_v3`).
+
+**Gap descoberto e resolvido:** as 18 originais têm dois campos de texto — `transcricao` (limpo, pra tela) e `roteiroAudio` (mesmo texto com tags de emoção `[warmly]`/`[calm]`/`[gently]`/etc. e pausas `<break time="X.Xs" />`, usado como entrada real da TTS). `series-itens.json` só tinha `transcricao`. Escrevi `roteiroAudio` pra cada uma das 44, com heurística por parágrafo seguindo a mesma convenção de tags (abertura, respiração, escritura, reflexão, reafirmação, oração final — com paleta mais "sonolenta" pra série Boa noite). Isso foi confirmado com o usuário antes de prosseguir.
+
+**Refactor:** lógica de chamada à API TTS extraída pra `scripts/lib/tts.ts`, reaproveitada por `scripts/generate-audio.ts` (18 originais) e pelo novo `scripts/generate-audio-series.ts` (44 de série). Durante a extração, um bug de ordem de carregamento de módulos ES fez a primeira rodada falhar 44/44 (env vars lidas no nível do módulo antes do `dotenv.config()` rodar) — corrigido lendo as env vars dentro da função, não no top-level.
+
+**Resultado:** 44/44 narrações geradas com sucesso na segunda rodada (após o fix), 0 falhas, sem precisar de retry. Duração real entre 65s e 127s por item. Todos os 44 mp3s enviados pro Vercel Blob (`audio/<id>.mp3`, mesma convenção dos originais).
+
+**Cota ElevenLabs:** não foi possível checar via API — a chave não tem o escopo `user_read` habilitado (mesma limitação já registrada anteriormente). Caracteres efetivamente enviados à API (via `roteiroAudio`, não `transcricao`): 48.836 chars pros 44 itens. O usuário decidiu prosseguir sem confirmação prévia da cota, dado o histórico de geração bem-sucedida.
+
+**Amostras ouvidas e aprovadas pelo usuário:** lote de teste inicial (Bom dia, SOS, Histórias bíblicas — Davi e Golias) aprovado antes da rodada completa. 4 amostras adicionais de séries diferentes (Gravidez, Está tudo bem, Momento presente, Boa noite) separadas ao final, pendentes de audição.
+
+**Pendente:** usuário ouvir as 4 amostras finais e confirmar antes de rodar `npm run content:seed` (banco local e produção são o mesmo — rodar o seed publica as narrações direto pros usuários). Nenhuma alteração de conteúdo foi publicada nesta rodada, só commitada na branch.
