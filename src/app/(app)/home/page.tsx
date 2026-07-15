@@ -31,7 +31,7 @@ async function getSons() {
 
 async function getSeries(userId: string) {
   try {
-    const seriesList = await db.select().from(series)
+    const seriesList = await db.select().from(series).where(eq(series.ativa, true))
     if (seriesList.length === 0) return []
 
     const totais = await db

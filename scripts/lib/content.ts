@@ -58,6 +58,7 @@ export interface SerieEntry {
   imagem?: string | null
   cor?: string | null
   descricao?: string | null
+  ativa?: boolean
 }
 
 export interface SerieItemEntry {
