@@ -70,6 +70,7 @@ export interface SerieItemEntry {
   textoBiblico?: string | null
   referencia?: string | null
   transcricao?: string | null
+  roteiroAudio?: string
 }
 
 export function loadSeries(): SerieEntry[] {
