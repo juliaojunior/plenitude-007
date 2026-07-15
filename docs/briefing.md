@@ -201,3 +201,17 @@ As 55 meditações exclusivas de série (`content/series-itens.json`) usavam um 
 ## Publicação da narração das séries + merge em main (2026-07-15)
 
 `content:seed` rodado após aprovação do usuário: 44/44 meditações de série com `urlAudio`/`duracaoSegundos` reais confirmados por query direta no banco (as 11 de Compaixão/Primeiros passos permanecem com o placeholder, sem alteração). Branch `content/audio-series-elevenlabs` mesclada em `main` (merge normal, sem squash) via commit `b9790f1`, build limpo, push feito e deploy de produção confirmado `READY` em `refugio.muitomelhor.net`.
+
+## Fechamento de sessão (2026-07-15)
+
+**Branches ativas:**
+- `main` — em dia com `origin/main` (`f3f1073`), inclui o merge da narração das séries já publicado e em produção.
+- `content/audio-series-elevenlabs` — em dia com o remoto (`91fa5c7`), já mesclada em `main`; mantida sem deletar por pedido do usuário.
+
+**Feito nesta sessão:** narração real (ElevenLabs eleven_v3) gerada e publicada para as 44 meditações das 9 séries ativas, com amostras aprovadas pelo usuário em duas rodadas; merge em `main`, build limpo, deploy de produção confirmado.
+
+**Pendente / não iniciado:**
+- Remixagem manual no Audacity (mixagem com música de fundo) das 44 narrações novas de série + das 12 meditações originais que ainda não passaram por esse polimento (só 6 das 18 originais já foram remixadas).
+- Narração das 11 meditações das séries "Compaixão" e "Primeiros passos" (deixadas de fora intencionalmente, por estarem com `ativa: false`) — tratar numa rodada separada quando essas séries forem reativadas.
+
+**Nenhuma decisão em aberto** dependendo do usuário neste momento — sessão encerrada em estado limpo, nada rodando em background, tudo commitado e pushado.
