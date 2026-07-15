@@ -4,12 +4,13 @@ import { useState, useTransition } from "react"
 import { Pencil, Check, X } from "lucide-react"
 import { atualizarNome } from "@/app/actions/progresso"
 
-interface Props { initialNome: string; userId: string }
+interface Props { initialNome: string; userId: string; isPlaceholder?: boolean }
 
-export function NomeEditor({ initialNome, userId }: Props) {
+export function NomeEditor({ initialNome, userId, isPlaceholder = false }: Props) {
   const [editing, setEditing] = useState(false)
   const [nome, setNome] = useState(initialNome)
-  const [draft, setDraft] = useState(initialNome)
+  const [draft, setDraft] = useState("")
+  const [placeholder, setPlaceholder] = useState(isPlaceholder)
   const [isPending, startTransition] = useTransition()
 
   function save() {
@@ -17,6 +18,7 @@ export function NomeEditor({ initialNome, userId }: Props) {
     startTransition(async () => {
       await atualizarNome(userId, draft.trim())
       setNome(draft.trim())
+      setPlaceholder(false)
       setEditing(false)
     })
   }
@@ -44,11 +46,11 @@ export function NomeEditor({ initialNome, userId }: Props) {
 
   return (
     <button
-      onClick={() => { setDraft(nome); setEditing(true) }}
-      className="group flex items-center gap-2 text-xl font-semibold text-[var(--text)]"
+      onClick={() => { setDraft(placeholder ? "" : nome); setEditing(true) }}
+      className={`group flex items-center gap-2 text-xl font-semibold ${placeholder ? "italic text-[var(--text-muted)]" : "text-[var(--text)]"}`}
     >
       {nome}
-      <Pencil size={14} className="text-[var(--text-faint)] opacity-0 group-hover:opacity-100 transition-opacity" />
+      <Pencil size={14} className="text-[var(--text-faint)] opacity-40 group-hover:opacity-100 transition-opacity" />
     </button>
   )
 }

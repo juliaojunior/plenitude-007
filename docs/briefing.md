@@ -110,3 +110,33 @@ Adicionada coluna `ativa` (`boolean`, default `true`) na tabela `series` via `db
 **Para reativar uma série no futuro:** mudar `"ativa": false` pra `"ativa": true` (ou remover o campo) em `content/series.json` e rodar `npm run content:seed` de novo — não precisa mexer no banco manualmente.
 
 **Pendente:** conferência visual do usuário (devem aparecer 9 cards na home) antes do merge em `main`.
+
+## Melhorias na tela de Perfil (2026-07-14)
+
+**Branch:** `feat/perfil-melhorias` (a partir de `main`, sem merge — aguardando conferência visual do usuário nos dois temas antes do merge).
+
+**Correções:** o nome exibido caía no literal `"Usuário"` quando `users.name` e o `firstName` do Clerk estavam vazios — trocado por `"Adicionar nome"` em itálico/muted, convidando a editar (`NomeEditor` ganhou a prop `isPlaceholder`). O avatar padrão era o emoji `🧘` (renderiza como uma figura em pose de meditação/trajes orientais em várias fontes de emoji, destoando do tom cristão do app) — único uso no código, trocado por `public/avatar-padrao.webp` (nova ilustração fornecida, convertida no mesmo padrão 480×480 já usado em `public/categorias/`/`public/series/`).
+
+**Conteúdo novo:** nova seção "Progresso de séries" entre "Sua jornada" e "Conquistas", reaproveitando a query `getSeries` — extraída de `src/app/(app)/home/page.tsx` para `src/lib/series.ts` (comportamento idêntico, `/home` agora importa de lá, sem duplicar a query). Mostra `X de Y séries concluídas` + até 3 séries em andamento como links. Conquistas desbloqueadas por completar uma série (`serie-completa-<id>`) ganharam um selo "Série" (fundo `--lavender`) no canto do card, já que antes usavam a mesma cor de tier "prata" das conquistas fixas e ficavam indistinguíveis. Confirmado sem mudança de código: a seção "Conquistas desbloqueadas" já existia (só não aparecia com a conta de teste zerada), e o sino do cabeçalho já leva para `/configuracoes/notificacoes`.
+
+**Design:** números de estatística em `font-light` sobre `--gold` tinham baixo contraste no tema claro (confirmado no print do usuário — lia como um anel vazio) — trocado para `font-semibold`, resolvendo também o estado "zero" sem precisar de copy dedicada. Botão "Sair da conta" perdeu o visual de card (sem fundo/borda), virando texto+ícone discreto, sem cor de alerta. Espaçamento entre "Sua jornada"/"Progresso de séries" e as seções seguintes aumentou de `mb-8` para `mb-10`. O lápis de edição do nome, que só aparecia no hover (invisível em touch), ficou com opacidade base 40% em vez de 0%.
+
+**Decisão registrada:** nenhum selo de "editar" foi adicionado ao avatar em si — não há seletor de avatar funcional nesta sprint, e um selo cosmético sem ação por trás enganaria o usuário. A coluna `users.avatarIcon` já existe no schema mas segue sem uso, pronta para uma futura funcionalidade de escolha de avatar.
+
+**Pendente:** conferência visual do usuário (claro e escuro) antes do merge em `main`.
+
+## Upload de avatar próprio (2026-07-15)
+
+**Branch:** `feat/perfil-melhorias` (continuação, ainda sem merge — aguardando o usuário testar um upload real antes do merge).
+
+`public/usuario.png` (arquivo fonte de referência da sprint anterior, sem nenhuma referência no código) foi apagado.
+
+**Investigação do campo `avatarIcon`:** já existia no schema (`users.avatar_icon`, default `"leaf"`) mas sem nenhum uso no código — nome e default sugerem um identificador curto de ícone pré-definido (slug), não uma URL livre. Decisão: **não reaproveitado**, criada uma coluna nova `avatarUrl` (`text`, nullable) via `db:push`, para não misturar semânticas (chave de ícone vs. URL de imagem enviada). `avatarIcon` continua existindo e sem uso, disponível pra uma futura funcionalidade de ícones pré-definidos se for retomada.
+
+**Fluxo implementado:** novo componente cliente `src/components/avatar-editor.tsx` — o círculo do avatar (com o selo de lápis, agora funcional) abre um `<input type="file" accept="image/*">` nativo ao ser tocado. No navegador: valida tipo (`image/*`) e tamanho original (máx. 5MB) antes de qualquer processamento; redimensiona via `canvas`/`createImageBitmap` para no máximo 512×512 e converte pra `.webp` (qualidade 0.85); envia o resultado como `FormData` pra nova server action `uploadAvatar` em `src/app/actions/progresso.ts`. No servidor: revalida tipo (`image/jpeg`/`png`/`webp`) e tamanho (defesa em profundidade, não confia só na validação do cliente), sobe o arquivo pro Vercel Blob (mesmo mecanismo já usado pros áudios, `@vercel/blob` `put()`) em `avatares/<userId>-<timestamp>.webp`, grava a URL em `users.avatarUrl` e revalida `/perfil`. O componente atualiza o avatar na tela assim que a action retorna a URL, sem recarregar a página, com spinner de carregamento sobre o círculo enquanto isso. Mensagens de erro inline (formato inválido, arquivo grande, falha ao processar) aparecem abaixo do avatar. Quem nunca enviou uma foto continua vendo `/avatar-padrao.webp`. Botão "Remover foto" (server action `removerAvatar`, zera `avatarUrl`) aparece só quando existe uma foto enviada.
+
+**Config necessária:** `next.config.ts` ganhou `images.remotePatterns` para `*.public.blob.vercel-storage.com` (senão o `next/image` recusa renderizar a URL do Blob) e `experimental.serverActions.bodySizeLimit: "2mb"` (limite padrão de 1MB é suficiente pra uma imagem já comprimida no cliente, mas a folga evita falhas em casos de borda).
+
+**Limitações conhecidas:** máximo 5MB no arquivo original (antes da compressão), formatos aceitos JPG/PNG/WEBP, imagem final sempre recomprimida pra webp 512×512. Compressão depende de `canvas`/`createImageBitmap` no navegador (suporte amplo em navegadores modernos, sem fallback pra navegadores muito antigos).
+
+**Pendente:** o usuário vai testar um upload real (enviando uma foto própria) antes do merge em `main`.
