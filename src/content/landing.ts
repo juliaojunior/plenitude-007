@@ -38,7 +38,7 @@ export interface Funcionalidade {
 export const FUNCIONALIDADES: Funcionalidade[] = [
   {
     icone: "categorias",
-    titulo: "9 temas pra cada momento",
+    titulo: "Temas pra cada momento",
     descricao:
       "De ansiedade a gratidão, de sono a esperança — encontre a meditação certa pro que você está sentindo agora.",
   },
