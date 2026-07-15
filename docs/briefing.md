@@ -197,3 +197,7 @@ As 55 meditações exclusivas de série (`content/series-itens.json`) usavam um 
 **Amostras ouvidas e aprovadas pelo usuário:** lote de teste inicial (Bom dia, SOS, Histórias bíblicas — Davi e Golias) aprovado antes da rodada completa. 4 amostras adicionais de séries diferentes (Gravidez, Está tudo bem, Momento presente, Boa noite) separadas ao final, pendentes de audição.
 
 **Pendente:** usuário ouvir as 4 amostras finais e confirmar antes de rodar `npm run content:seed` (banco local e produção são o mesmo — rodar o seed publica as narrações direto pros usuários). Nenhuma alteração de conteúdo foi publicada nesta rodada, só commitada na branch.
+
+## Publicação da narração das séries + merge em main (2026-07-15)
+
+`content:seed` rodado após aprovação do usuário: 44/44 meditações de série com `urlAudio`/`duracaoSegundos` reais confirmados por query direta no banco (as 11 de Compaixão/Primeiros passos permanecem com o placeholder, sem alteração). Branch `content/audio-series-elevenlabs` mesclada em `main` (merge normal, sem squash) via commit `b9790f1`, build limpo, push feito e deploy de produção confirmado `READY` em `refugio.muitomelhor.net`.
