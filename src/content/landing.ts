@@ -1,30 +1,32 @@
 export const SEO = {
-  title: "[PREENCHER: título de SEO, ~60 caracteres]",
-  description: "[PREENCHER: meta description, ~150-160 caracteres]",
+  title: "Refúgio — Meditação Cristã para Ansiedade, Sono e Paz",
+  description:
+    "Meditações guiadas com base bíblica, o Maná Diário e sons relaxantes para cuidar da sua saúde emocional e espiritual. Grátis, direto no navegador.",
   ogImage: "/categorias/paz.webp",
 }
 
 export const HERO = {
-  headline: "[PREENCHER: headline principal do hero]",
-  subheadline: "[PREENCHER: subheadline de apoio, 1-2 frases]",
+  headline: "Um Refúgio diário para respirar, orar e descansar em Deus.",
+  subheadline:
+    "Meditações guiadas com base bíblica e um momento de paz com Deus, todos os dias, onde você estiver.",
   ctaLabel: "Criar conta",
   ctaSecondaryLabel: "Já tenho conta",
 }
 
 export const PROBLEMA = {
-  headline: "[PREENCHER: headline da seção de dor/validação]",
+  headline: "Você não precisa enfrentar isso sozinho(a).",
   itens: [
-    "[PREENCHER: dor 1 — ex: ansiedade]",
-    "[PREENCHER: dor 2 — ex: insônia]",
-    "[PREENCHER: dor 3 — ex: distância espiritual]",
-    "[PREENCHER: dor 4]",
+    "A ansiedade aperta o peito sem avisar.",
+    "As noites mal dormidas viram rotina.",
+    "A oração vira só mais uma tarefa — ou desaparece de vez.",
+    "A correria não deixa espaço pra respirar e ouvir a Deus.",
   ],
 }
 
 export const DIFERENCIAL = {
-  headline: "[PREENCHER: headline do diferencial]",
+  headline: "Uma meditação com raiz bíblica.",
   paragrafo:
-    "[PREENCHER: parágrafo explicando a base bíblica e o Maná Diário como diferencial frente a apps seculares]",
+    "A maioria dos apps de meditação foca só em respiração e técnica. O Refúgio começa em outro lugar: na Palavra de Deus. Todos os dias, o Maná Diário traz um texto bíblico e uma reflexão para alimentar sua alma — o ponto de partida para cada meditação guiada, cada oração, cada momento de silêncio com Deus.",
 }
 
 export interface Funcionalidade {
@@ -36,42 +38,46 @@ export interface Funcionalidade {
 export const FUNCIONALIDADES: Funcionalidade[] = [
   {
     icone: "categorias",
-    titulo: "[PREENCHER: título — categorias]",
-    descricao: "[PREENCHER: descrição curta — 9 categorias de meditação]",
+    titulo: "9 temas pra cada momento",
+    descricao:
+      "De ansiedade a gratidão, de sono a esperança — encontre a meditação certa pro que você está sentindo agora.",
   },
   {
     icone: "series",
-    titulo: "[PREENCHER: título — séries]",
-    descricao: "[PREENCHER: descrição curta — progressão em séries]",
+    titulo: "Séries pra ir mais fundo",
+    descricao:
+      "Sequências guiadas que caminham com você, dia após dia, num mesmo tema — sem pressa, no seu ritmo.",
   },
   {
     icone: "sons",
-    titulo: "[PREENCHER: título — sons]",
-    descricao: "[PREENCHER: descrição curta — sons e músicas ambiente]",
+    titulo: "Sons pra acalmar a mente",
+    descricao:
+      "Chuva, ondas, sinos e músicas instrumentais pra criar seu próprio espaço de quietude, com ou sem meditação.",
   },
   {
     icone: "conquistas",
-    titulo: "[PREENCHER: título — conquistas]",
-    descricao: "[PREENCHER: descrição curta — sistema de conquistas]",
+    titulo: "Conquistas pra celebrar sua jornada",
+    descricao:
+      "Cada dia de constância importa. Acompanhe sua sequência, suas meditações e desbloqueie conquistas no caminho.",
   },
 ]
 
 export const INSTALACAO = {
-  headline: "[PREENCHER: headline da seção de instalação]",
+  headline: "Leve o Refúgio com você",
   ios: {
     label: "iPhone (Safari)",
     passos: [
-      "[PREENCHER: passo 1 iOS — ex: abra o site no Safari]",
-      "[PREENCHER: passo 2 iOS — ex: toque em Compartilhar]",
-      "[PREENCHER: passo 3 iOS — ex: toque em Adicionar à Tela de Início]",
+      "Abra refugio.muitomelhor.net no Safari.",
+      "Toque no ícone de Compartilhar (o quadrado com a seta pra cima).",
+      'Escolha "Adicionar à Tela de Início" e confirme.',
     ],
   },
   android: {
     label: "Android (Chrome)",
     passos: [
-      "[PREENCHER: passo 1 Android — ex: abra o site no Chrome]",
-      "[PREENCHER: passo 2 Android — ex: toque no menu (⋮)]",
-      "[PREENCHER: passo 3 Android — ex: toque em Instalar app]",
+      "Abra refugio.muitomelhor.net no Chrome.",
+      "Toque no menu (⋮) no canto superior direito.",
+      'Escolha "Instalar app" ou "Adicionar à tela inicial".',
     ],
   },
 }
@@ -82,16 +88,32 @@ export interface FaqItem {
 }
 
 export const FAQ: { headline: string; itens: FaqItem[] } = {
-  headline: "[PREENCHER: headline do FAQ — ex: Perguntas frequentes]",
+  headline: "Perguntas frequentes",
   itens: [
-    { pergunta: "[PERGUNTA 1 — denominação]", resposta: "[RESPOSTA 1]" },
-    { pergunta: "[PERGUNTA 2 — tradução bíblica usada]", resposta: "[RESPOSTA 2]" },
-    { pergunta: "[PERGUNTA 3 — gratuidade]", resposta: "[RESPOSTA 3]" },
-    { pergunta: "[PERGUNTA 4 — privacidade]", resposta: "[RESPOSTA 4]" },
+    {
+      pergunta: "O Refúgio é ligado a alguma igreja ou denominação específica?",
+      resposta:
+        "Não. O Refúgio é feito pra qualquer pessoa que segue a Jesus, independente da denominação ou tradição. Nosso foco é no que une a fé cristã: a Palavra de Deus, a oração e a busca por paz Nele.",
+    },
+    {
+      pergunta: "Qual tradução da Bíblia vocês usam?",
+      resposta:
+        "Os textos do Maná Diário e das meditações são parafraseados — reescritos de forma acessível e contemplativa, sempre fiéis ao sentido original das Escrituras, em vez de citar uma tradução específica palavra por palavra.",
+    },
+    {
+      pergunta: "O Refúgio é gratuito?",
+      resposta:
+        "Sim, hoje o Refúgio é 100% gratuito. Estamos no início e focados em servir bem quem já está aqui — se isso mudar no futuro, vamos avisar com antecedência e pensar em quem já faz parte da comunidade.",
+    },
+    {
+      pergunta: "Meus dados estão seguros?",
+      resposta:
+        "Sim. Não vendemos seus dados nem os usamos pra anúncios. O login é só por código enviado ao seu e-mail (sem senha pra vazar), e suas meditações e seu progresso ficam privados, visíveis só pra você.",
+    },
   ],
 }
 
 export const CTA_FINAL = {
-  headline: "[PREENCHER: headline do CTA final]",
+  headline: "Seu Refúgio está a um toque de distância.",
   ctaLabel: "Criar conta",
 }
