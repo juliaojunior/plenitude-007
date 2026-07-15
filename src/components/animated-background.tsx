@@ -13,11 +13,11 @@ import { cn } from "@/lib/utils"
  * Intensity varies by route: prominent on the sign-in / sign-up / profile
  * screens, subtle everywhere else so it never competes with content.
  */
-const PROMINENT_ROUTES = ["/sign-in", "/sign-up", "/perfil"]
+const PROMINENT_ROUTES = ["/", "/sign-in", "/sign-up", "/perfil"]
 
 export function AnimatedBackground() {
   const pathname = usePathname()
-  const prominent = PROMINENT_ROUTES.some((r) => pathname?.startsWith(r))
+  const prominent = PROMINENT_ROUTES.some((r) => (r === "/" ? pathname === "/" : pathname?.startsWith(r)))
   const opacityClass = prominent ? "opacity-40" : "opacity-[0.15]"
 
   return (
