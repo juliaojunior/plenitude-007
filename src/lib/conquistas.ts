@@ -25,7 +25,7 @@ export const CONQUISTAS: Conquista[] = [
   },
   {
     id: "semana-zen",
-    titulo: "Semana Zen",
+    titulo: "Semana Abençoada",
     descricao: "7 dias consecutivos meditando",
     emoji: "🌿",
     tier: "bronze",
