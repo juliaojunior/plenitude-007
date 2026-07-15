@@ -140,3 +140,18 @@ Adicionada coluna `ativa` (`boolean`, default `true`) na tabela `series` via `db
 **Limitações conhecidas:** máximo 5MB no arquivo original (antes da compressão), formatos aceitos JPG/PNG/WEBP, imagem final sempre recomprimida pra webp 512×512. Compressão depende de `canvas`/`createImageBitmap` no navegador (suporte amplo em navegadores modernos, sem fallback pra navegadores muito antigos).
 
 **Pendente:** o usuário vai testar um upload real (enviando uma foto própria) antes do merge em `main`.
+
+## Troca de domínio principal: plenitude → refugio.muitomelhor.net (2026-07-15)
+
+Direto em `main`, sem branch — mudança é 100% configuração externa (Vercel/Hostinger/Clerk), nenhuma referência a domínio hardcoded foi encontrada no código-fonte (`src/`, `manifest.json`, `.env.local` só usam caminhos relativos ou variáveis).
+
+**O que foi feito:**
+- **Vercel**: `refugio.muitomelhor.net` adicionado ao projeto `plenitude-007` (`vercel domains add`) e definido como domínio principal — na prática isso significa configurar `plenitude.muitomelhor.net` para redirecionar (308) pro novo domínio via API (`PATCH /v9/projects/.../domains/plenitude.muitomelhor.net` com `redirect`), já que a Vercel não tem esse "setar como principal" na CLI, só via API/dashboard.
+- **DNS na Hostinger**: registro `A refugio → 76.76.21.21` (mesmo IP do domínio antigo). SSL emitido automaticamente pela Vercel.
+- **Clerk (produção)**: troca de domínio via Backend API (`POST /v1/instance/change_domain`). **Pegadinha encontrada:** passar só `home_url` faz o Clerk tratar como "Primary application" e migrar a infra do Clerk pro domínio raiz (`clerk.muitomelhor.net`) em vez do subdomínio — precisa do flag `is_secondary: true` no body pra manter o padrão anterior (Clerk também no subdomínio, como já era com `clerk.plenitude.muitomelhor.net`). Isso gerou 5 novos CNAMEs (`clerk`, `accounts`, `clkmail`, `clk._domainkey`, `clk2._domainkey`, todos `.refugio.muitomelhor.net`) adicionados na Hostinger. Confirmado 100% verificado (`dns`/`ssl`/`mail: complete`) via `clerk deploy status`.
+- **Chaves do Clerk regeneradas**: a troca de domínio gera um novo `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` (o domínio do FAPI vem codificado na chave) e um novo `CLERK_SECRET_KEY`. Atualizadas na Vercel (env de produção, `vercel env rm` + `vercel env add`) e disparado `vercel redeploy --target production` pra rebuildar com as novas chaves (`NEXT_PUBLIC_*` é embutido em build time, promover o deployment antigo sem rebuild não seria suficiente).
+- **Docs**: `docs/refugio-contexto-para-analise.md` atualizado pra apontar `https://refugio.muitomelhor.net` como URL de produção.
+
+**Teste:** app carrega normalmente em `https://refugio.muitomelhor.net`, redireciona pra `/sign-in`, manifest do PWA resolve com os ícones corretos. Login com Email OTP testado e confirmado funcionando pelo usuário.
+
+**Não foi necessário** (confirmado pelo usuário antes de começar): preservar compatibilidade com PWA já instalado ou push notifications do domínio antigo — só existiam contas de teste em produção.
