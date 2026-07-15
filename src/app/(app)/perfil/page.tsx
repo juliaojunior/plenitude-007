@@ -1,11 +1,13 @@
 import { auth, currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { Bell } from "lucide-react"
 import { eq, inArray } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { progressoUsuario, conquistasUsuario, users, series } from "@/lib/db/schema"
 import { CONQUISTAS, TIER_COLORS, SERIE_CONQUISTA_PREFIX, type Conquista } from "@/lib/conquistas"
+import { getSeries } from "@/lib/series"
 import { NomeEditor } from "@/components/nome-editor"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { LogoutButton } from "@/components/logout-button"
@@ -61,7 +63,14 @@ export default async function PerfilPage() {
   const desbloqueadas = [...CONQUISTAS.filter((c) => conquistasIds.has(c.id)), ...desbloqueadasSerie]
   const bloqueadas = CONQUISTAS.filter((c) => !conquistasIds.has(c.id)).slice(0, 3)
 
-  const nome = dbUser?.name ?? clerkUser?.firstName ?? "Usuário"
+  const seriesProgresso = await getSeries(userId)
+  const seriesConcluidas = seriesProgresso.filter((s) => s.total > 0 && s.concluidas === s.total)
+  const seriesEmAndamento = seriesProgresso
+    .filter((s) => s.concluidas > 0 && s.concluidas < s.total)
+    .slice(0, 3)
+
+  const nomeReal = dbUser?.name ?? clerkUser?.firstName ?? null
+  const nome = nomeReal ?? "Adicionar nome"
   const email = clerkUser?.emailAddresses?.[0]?.emailAddress ?? ""
 
   const stats = [
@@ -87,15 +96,15 @@ export default async function PerfilPage() {
 
       {/* Avatar + nome */}
       <div className="mb-8 flex flex-col items-center gap-3">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--bg-surface)] text-4xl border-2 border-[var(--gold)]/30">
-          🧘
+        <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--gold)]/30 bg-[var(--bg-surface)]">
+          <Image src="/avatar-padrao.webp" alt="Avatar" fill sizes="80px" className="object-cover" />
         </div>
-        <NomeEditor initialNome={nome} userId={userId} />
+        <NomeEditor initialNome={nome} userId={userId} isPlaceholder={!nomeReal} />
         <p className="text-sm text-[var(--text-muted)]">{email}</p>
       </div>
 
       {/* Stats */}
-      <section className="mb-8">
+      <section className="mb-10">
         <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)]">
           Sua jornada
         </h2>
@@ -105,12 +114,41 @@ export default async function PerfilPage() {
               key={label}
               className="flex flex-col items-center gap-1 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] py-4"
             >
-              <span className="font-display text-3xl font-light text-[var(--gold)]">{value}</span>
+              <span className="font-display text-3xl font-semibold text-[var(--gold)]">{value}</span>
               <span className="text-[10px] text-[var(--text-muted)]">{label}</span>
             </div>
           ))}
         </div>
       </section>
+
+      {/* Progresso de séries */}
+      {seriesProgresso.length > 0 && (
+        <section className="mb-10">
+          <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)]">
+            Progresso de séries
+          </h2>
+          <div className="flex flex-col gap-2">
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-4">
+              <span className="font-display text-2xl font-semibold text-[var(--gold)]">
+                {seriesConcluidas.length}
+              </span>{" "}
+              <span className="text-sm text-[var(--text-muted)]">
+                de {seriesProgresso.length} séries concluídas
+              </span>
+            </div>
+            {seriesEmAndamento.map((s) => (
+              <Link
+                key={s.id}
+                href={`/series/${s.id}`}
+                className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-3 transition-colors hover:border-[var(--gold)]/40"
+              >
+                <span className="text-sm font-medium text-[var(--text)]">{s.titulo}</span>
+                <span className="text-xs text-[var(--text-muted)]">{s.concluidas}/{s.total}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Conquistas desbloqueadas */}
       {desbloqueadas.length > 0 && (
@@ -121,12 +159,18 @@ export default async function PerfilPage() {
           <div className="grid grid-cols-4 gap-2">
             {desbloqueadas.map((c) => {
               const colors = TIER_COLORS[c.tier]
+              const isSerie = c.id.startsWith(SERIE_CONQUISTA_PREFIX)
               return (
                 <div
                   key={c.id}
-                  className={`flex flex-col items-center gap-1.5 rounded-xl border p-3 ${colors.bg} ${colors.border}`}
+                  className={`relative flex flex-col items-center gap-1.5 rounded-xl border p-3 ${colors.bg} ${colors.border}`}
                   title={`${c.titulo}: ${c.descricao}`}
                 >
+                  {isSerie && (
+                    <span className="absolute -top-1 -right-1 rounded-full bg-[var(--lavender)] px-1.5 py-0.5 text-[7px] font-semibold text-white">
+                      Série
+                    </span>
+                  )}
                   <span className="text-2xl">{c.emoji}</span>
                   <span className={`text-[9px] font-medium text-center ${colors.text}`}>
                     {c.titulo}

@@ -8,7 +8,7 @@ export function LogoutButton() {
     <SignOutButton redirectUrl="/sign-in">
       <button
         type="button"
-        className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] py-3 text-sm font-medium text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-surface)] hover:text-[var(--text)]"
+        className="flex w-full items-center justify-center gap-2 py-2 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text)]"
       >
         <LogOut size={16} />
         Sair da conta
