@@ -23,6 +23,7 @@ export const series = pgTable("series", {
   imagem: text("imagem"),
   cor: text("cor"),
   descricao: text("descricao"),
+  ativa: boolean("ativa").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 })
 

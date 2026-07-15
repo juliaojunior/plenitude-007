@@ -100,3 +100,13 @@ O fix anterior tornou as 3 cópias totalmente acessíveis (sem `inert`, sem `ari
 Os 11 arquivos entregues em `public/series/` (nome = título da série, ex. `Gravidez.png`, `está tudo bem.png`, `Histórias bíblicas.png`) casaram 1:1 e sem ambiguidade com as 11 séries de `content/series.json` (comparação por título, ignorando maiúsculas/acentos/espaço vs. hífen). Convertidos pra `.webp` com ImageMagick (`magick -resize 480x480^ -gravity center -extent 480x480 -quality 82`), mesmo padrão 480×480 já usado em `public/categorias/`, e renomeados pro slug do id da série sem o prefixo `serie-` (ex. `serie-esta-tudo-bem` → `esta-tudo-bem.webp`). Campo `imagem` de cada série em `content/series.json` atualizado para `/series/<slug>.webp`; `npm run content:seed` rodado e confirmado por query direta: as 11 linhas da tabela `series` têm `imagem` preenchida, nenhuma faltando.
 
 **Pendente:** conferência visual do usuário nos 11 cards da home/tela de séries antes do merge em `main`.
+
+## Campo `ativa` nas séries — ocultar sem apagar (2026-07-14)
+
+**Branch:** `content/imagens-series` (a partir de `main`, sem merge — aguardando conferência visual do usuário, agora só 9 cards na home).
+
+Adicionada coluna `ativa` (`boolean`, default `true`) na tabela `series` via `db:push`. `content/series.json` marca `"ativa": false` só em **"Compaixão"** e **"Primeiros passos"**; as outras 9 continuam sem o campo (assume `true` no seed e no schema). A query que alimenta a grade de séries da home (`getSeries` em `src/app/(app)/home/page.tsx`) agora filtra `where(eq(series.ativa, true))` — as 2 séries ocultas continuam intactas no banco (dados, meditações e progresso do usuário não são tocados) e a rota `/series/[serieId]` continua acessível diretamente por link, só não aparecem na listagem da home. Confirmado por query direta: 11 séries no banco, exatamente essas 2 com `ativa = false`.
+
+**Para reativar uma série no futuro:** mudar `"ativa": false` pra `"ativa": true` (ou remover o campo) em `content/series.json` e rodar `npm run content:seed` de novo — não precisa mexer no banco manualmente.
+
+**Pendente:** conferência visual do usuário (devem aparecer 9 cards na home) antes do merge em `main`.

@@ -94,9 +94,13 @@ async function main() {
       imagem: s.imagem ?? null,
       cor: s.cor ?? null,
       descricao: s.descricao ?? null,
+      ativa: s.ativa ?? true,
     }).onConflictDoUpdate({
       target: series.id,
-      set: { titulo: s.titulo, imagem: s.imagem ?? null, cor: s.cor ?? null, descricao: s.descricao ?? null },
+      set: {
+        titulo: s.titulo, imagem: s.imagem ?? null, cor: s.cor ?? null, descricao: s.descricao ?? null,
+        ativa: s.ativa ?? true,
+      },
     })
   }
   console.log(`✓ Séries: ${seriesList.length} upserts`)
