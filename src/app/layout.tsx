@@ -20,6 +20,7 @@ const jakarta = Plus_Jakarta_Sans({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://refugio.muitomelhor.net"),
   title: { default: "Refúgio", template: "%s · Refúgio" },
   description: "Meditações cristãs para o seu bem-estar espiritual diário.",
   manifest: "/manifest.json",
