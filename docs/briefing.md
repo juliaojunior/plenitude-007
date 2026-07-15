@@ -155,3 +155,25 @@ Direto em `main`, sem branch — mudança é 100% configuração externa (Vercel
 **Teste:** app carrega normalmente em `https://refugio.muitomelhor.net`, redireciona pra `/sign-in`, manifest do PWA resolve com os ícones corretos. Login com Email OTP testado e confirmado funcionando pelo usuário.
 
 **Não foi necessário** (confirmado pelo usuário antes de começar): preservar compatibilidade com PWA já instalado ou push notifications do domínio antigo — só existiam contas de teste em produção.
+
+## Landing page — estrutura (2026-07-15)
+
+**Branch:** `feat/landing-page` (a partir de `main`, sem merge — aguardando o usuário escrever o texto real e revisar).
+
+Rota `/` agora mostra uma landing page pra visitantes deslogados (antes redirecionava direto pra `/sign-in`). Logado continua indo direto pra `/home`, sem mudança.
+
+**Onde editar o texto:** todo o conteúdo (headlines, parágrafos, perguntas/respostas do FAQ, meta tags de SEO) fica em **`src/content/landing.ts`** — um arquivo só, sem nenhum texto espalhado nos componentes visuais. Cada campo ainda não escrito tem um placeholder `"[PREENCHER: ...]"` dizendo exatamente o que falta. Basta editar as strings nesse arquivo; nenhuma mudança de componente é necessária pra trocar o texto.
+
+**Estrutura visual:** 7 seções em `src/components/landing/` (hero, problema, diferencial, vitrine, como-instalar, faq, cta-final), compostas em `landing-page.tsx`. Novos primitivos reutilizáveis em `src/components/ui/`: `accordion.tsx` (novo, via `@radix-ui/react-accordion`) e `tabs.tsx` (novo wrapper, mas a dependência `@radix-ui/react-tabs` já estava no `package.json` sem uso).
+
+**Tema sempre escuro:** a landing força o tema escuro do app independente da preferência do visitante (`src/components/theme-provider.tsx` agora usa `forcedTheme="dark"` do `next-themes` quando `pathname === "/"`) — isso também resolvia uma inconsistência: o Aurora Background usa variantes `dark:` do Tailwind amarradas à classe no `<html>`, então só sobrescrever cor localmente nos componentes da landing deixaria o Aurora renderizando errado atrás do conteúdo. `PROMINENT_ROUTES` em `animated-background.tsx` ganhou `"/"` pra intensidade forte igual ao `/sign-in` (com cuidado: o match precisou de comparação exata pra `"/"`, não `startsWith`, senão toda rota do app viraria "prominent").
+
+**Componentes do 21st.dev usados como referência estrutural** (adaptados à mão, não instalados via CLI — o projeto usa Tailwind v4 CSS-first sem `components.json`, e o Aurora Background já tinha sido adaptado manualmente da mesma forma): hero com reveal de palavra a palavra (inspirado em https://21st.dev/community/components/uniquesonu/animated-hero-section-ui/default), cards de funcionalidade com hover (inspirado em https://21st.dev/community/components/Codehagen/display-cards/default), accordion do FAQ (inspirado em https://21st.dev/community/components/skyleen77/radix-accordion).
+
+**Ajuste fora do plano original:** o build acusou aviso de `metadataBase` não configurado (necessário pra resolver a URL da imagem Open Graph corretamente em produção, senão cai em `localhost:3000`). Adicionado `metadataBase: new URL("https://refugio.muitomelhor.net")` no `metadata` do `src/app/layout.tsx`.
+
+**Fora do escopo (de propósito):** texto final de qualquer seção, captura de e-mail/newsletter, analytics, dados dinâmicos do banco na vitrine (usa texto estático do content file).
+
+**Verificação:** `npx tsc --noEmit` limpo, `npm run lint` limpo (só o warning pré-existente não relacionado em `notificacoes.ts`), `npm run build` completo com sucesso (`/` aparece na lista de rotas). Testado com `npm run dev`: HTML confirma o placeholder da headline (dividido em spans pela animação palavra-a-palavra), links `/sign-in` e `/sign-up`, e o `<title>` com o placeholder de SEO.
+
+**Spec e plano completos:** `docs/superpowers/specs/2026-07-15-landing-page-design.md` e `docs/superpowers/plans/2026-07-15-landing-page.md`.
