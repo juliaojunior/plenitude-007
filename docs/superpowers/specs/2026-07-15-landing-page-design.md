@@ -49,8 +49,9 @@ Cada componente de seção só lê o pedaço do content file que precisa — nen
 
 ## Tema e identidade visual
 
-- **Decisão**: a landing é **sempre escura** (navy `#0D0F1C` / dourado `#D4AA5F` / branco-quente `#EDE9E0`), independente do tema claro/escuro que o resto do app segue via `next-themes`. Cores fixas em vez das variáveis CSS `var(--gold)` etc (que mudam com o tema do sistema) — decisão do usuário, landing de marketing mantém identidade fixa.
-- Aurora Background: reaproveitar o componente global já existente (`src/components/animated-background.tsx`), em intensidade forte. Adicionar `"/"` ao array `PROMINENT_ROUTES` (hoje `["/sign-in", "/sign-up", "/perfil"]`) pra ativar a intensidade forte na landing.
+- **Decisão**: a landing é **sempre escura** (navy `#0D0F1C` / dourado `#D4AA5F` / branco-quente `#EDE9E0`), independente do tema claro/escuro que o resto do app segue via `next-themes`.
+- **Nota de implementação**: em vez de hardcodar hex nos componentes, forçar o tema escuro na raiz via `forcedTheme` do `next-themes` quando `pathname === "/"` (em `src/components/theme-provider.tsx`) e continuar usando as variáveis CSS já existentes (`var(--gold)`, `var(--bg)`, `var(--text)` etc). Motivo: o Aurora Background (`AnimatedBackground`) usa variantes `dark:` do Tailwind que respondem à classe `.dark` no `<html>` — só sobrescrever cor localmente nos componentes da landing (sem tocar o `<html>`) deixaria o Aurora renderizando no modo claro (gradiente/inversão diferentes) atrás de um conteúdo forçado pra navy, uma inconsistência visual. Forçar o tema no `<html>` resolve os dois de uma vez, sem duplicar cores hardcoded e sem persistir a preferência do usuário no `localStorage` (`forcedTheme` não grava, só sobrescreve a resolução pra aquela renderização).
+- Aurora Background: reaproveitar o componente global já existente (`src/components/animated-background.tsx`), em intensidade forte. Adicionar `"/"` ao array `PROMINENT_ROUTES` (hoje `["/sign-in", "/sign-up", "/perfil"]`) — com cuidado: o match usa `pathname?.startsWith(r)`, e `"/".startsWith` casaria com QUALQUER rota, então o caso `"/"` precisa de comparação exata (`pathname === "/"`), não `startsWith`.
 - Mobile-first: maioria dos visitantes vem do celular.
 
 ## Seções (nesta ordem)
