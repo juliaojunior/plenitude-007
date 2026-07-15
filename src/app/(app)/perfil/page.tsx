@@ -1,7 +1,6 @@
 import { auth, currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import Image from "next/image"
 import { Bell } from "lucide-react"
 import { eq, inArray } from "drizzle-orm"
 import { db } from "@/lib/db"
@@ -9,6 +8,7 @@ import { progressoUsuario, conquistasUsuario, users, series } from "@/lib/db/sch
 import { CONQUISTAS, TIER_COLORS, SERIE_CONQUISTA_PREFIX, type Conquista } from "@/lib/conquistas"
 import { getSeries } from "@/lib/series"
 import { NomeEditor } from "@/components/nome-editor"
+import { AvatarEditor } from "@/components/avatar-editor"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { LogoutButton } from "@/components/logout-button"
 
@@ -96,9 +96,7 @@ export default async function PerfilPage() {
 
       {/* Avatar + nome */}
       <div className="mb-8 flex flex-col items-center gap-3">
-        <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--gold)]/30 bg-[var(--bg-surface)]">
-          <Image src="/avatar-padrao.webp" alt="Avatar" fill sizes="80px" className="object-cover" />
-        </div>
+        <AvatarEditor userId={userId} initialUrl={dbUser?.avatarUrl ?? null} />
         <NomeEditor initialNome={nome} userId={userId} isPlaceholder={!nomeReal} />
         <p className="text-sm text-[var(--text-muted)]">{email}</p>
       </div>

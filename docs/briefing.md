@@ -124,3 +124,19 @@ Adicionada coluna `ativa` (`boolean`, default `true`) na tabela `series` via `db
 **Decisão registrada:** nenhum selo de "editar" foi adicionado ao avatar em si — não há seletor de avatar funcional nesta sprint, e um selo cosmético sem ação por trás enganaria o usuário. A coluna `users.avatarIcon` já existe no schema mas segue sem uso, pronta para uma futura funcionalidade de escolha de avatar.
 
 **Pendente:** conferência visual do usuário (claro e escuro) antes do merge em `main`.
+
+## Upload de avatar próprio (2026-07-15)
+
+**Branch:** `feat/perfil-melhorias` (continuação, ainda sem merge — aguardando o usuário testar um upload real antes do merge).
+
+`public/usuario.png` (arquivo fonte de referência da sprint anterior, sem nenhuma referência no código) foi apagado.
+
+**Investigação do campo `avatarIcon`:** já existia no schema (`users.avatar_icon`, default `"leaf"`) mas sem nenhum uso no código — nome e default sugerem um identificador curto de ícone pré-definido (slug), não uma URL livre. Decisão: **não reaproveitado**, criada uma coluna nova `avatarUrl` (`text`, nullable) via `db:push`, para não misturar semânticas (chave de ícone vs. URL de imagem enviada). `avatarIcon` continua existindo e sem uso, disponível pra uma futura funcionalidade de ícones pré-definidos se for retomada.
+
+**Fluxo implementado:** novo componente cliente `src/components/avatar-editor.tsx` — o círculo do avatar (com o selo de lápis, agora funcional) abre um `<input type="file" accept="image/*">` nativo ao ser tocado. No navegador: valida tipo (`image/*`) e tamanho original (máx. 5MB) antes de qualquer processamento; redimensiona via `canvas`/`createImageBitmap` para no máximo 512×512 e converte pra `.webp` (qualidade 0.85); envia o resultado como `FormData` pra nova server action `uploadAvatar` em `src/app/actions/progresso.ts`. No servidor: revalida tipo (`image/jpeg`/`png`/`webp`) e tamanho (defesa em profundidade, não confia só na validação do cliente), sobe o arquivo pro Vercel Blob (mesmo mecanismo já usado pros áudios, `@vercel/blob` `put()`) em `avatares/<userId>-<timestamp>.webp`, grava a URL em `users.avatarUrl` e revalida `/perfil`. O componente atualiza o avatar na tela assim que a action retorna a URL, sem recarregar a página, com spinner de carregamento sobre o círculo enquanto isso. Mensagens de erro inline (formato inválido, arquivo grande, falha ao processar) aparecem abaixo do avatar. Quem nunca enviou uma foto continua vendo `/avatar-padrao.webp`. Botão "Remover foto" (server action `removerAvatar`, zera `avatarUrl`) aparece só quando existe uma foto enviada.
+
+**Config necessária:** `next.config.ts` ganhou `images.remotePatterns` para `*.public.blob.vercel-storage.com` (senão o `next/image` recusa renderizar a URL do Blob) e `experimental.serverActions.bodySizeLimit: "2mb"` (limite padrão de 1MB é suficiente pra uma imagem já comprimida no cliente, mas a folga evita falhas em casos de borda).
+
+**Limitações conhecidas:** máximo 5MB no arquivo original (antes da compressão), formatos aceitos JPG/PNG/WEBP, imagem final sempre recomprimida pra webp 512×512. Compressão depende de `canvas`/`createImageBitmap` no navegador (suporte amplo em navegadores modernos, sem fallback pra navegadores muito antigos).
+
+**Pendente:** o usuário vai testar um upload real (enviando uma foto própria) antes do merge em `main`.

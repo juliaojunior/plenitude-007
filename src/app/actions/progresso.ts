@@ -1,5 +1,6 @@
 "use server"
 
+import { put } from "@vercel/blob"
 import { db } from "@/lib/db"
 import { progressoUsuario, conquistasUsuario, users, meditacoesConcluidas, meditacoes } from "@/lib/db/schema"
 import { eq, and, count } from "drizzle-orm"
@@ -7,6 +8,9 @@ import { CONQUISTAS, SERIE_CONQUISTA_PREFIX } from "@/lib/conquistas"
 import { nanoid } from "@/lib/nanoid"
 import { todayString } from "@/lib/utils"
 import { revalidatePath } from "next/cache"
+
+const AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"]
+const AVATAR_MAX_BYTES = 5 * 1024 * 1024
 
 async function verificarConquistaDeSerie(userId: string, meditacaoId: string) {
   const [med] = await db
@@ -138,5 +142,31 @@ export async function registrarMeditacaoConcluida(
 
 export async function atualizarNome(userId: string, nome: string) {
   await db.update(users).set({ name: nome.trim() }).where(eq(users.id, userId))
+  revalidatePath("/perfil")
+}
+
+export async function uploadAvatar(
+  userId: string,
+  formData: FormData
+): Promise<{ url: string } | { error: string }> {
+  const file = formData.get("file")
+  if (!(file instanceof File)) return { error: "Nenhum arquivo enviado." }
+  if (!AVATAR_TYPES.includes(file.type)) {
+    return { error: "Formato não suportado. Envie uma imagem JPG, PNG ou WEBP." }
+  }
+  if (file.size > AVATAR_MAX_BYTES) return { error: "Arquivo muito grande (máx. 5MB)." }
+
+  const blob = await put(`avatares/${userId}-${Date.now()}.webp`, file, {
+    access: "public",
+    contentType: "image/webp",
+    token: process.env.BLOB_READ_WRITE_TOKEN,
+  })
+  await db.update(users).set({ avatarUrl: blob.url }).where(eq(users.id, userId))
+  revalidatePath("/perfil")
+  return { url: blob.url }
+}
+
+export async function removerAvatar(userId: string) {
+  await db.update(users).set({ avatarUrl: null }).where(eq(users.id, userId))
   revalidatePath("/perfil")
 }

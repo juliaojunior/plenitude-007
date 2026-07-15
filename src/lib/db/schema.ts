@@ -13,6 +13,7 @@ export const users = pgTable("users", {
   email: text("email").notNull(),
   name: text("name"),
   avatarIcon: text("avatar_icon").default("leaf"),
+  avatarUrl: text("avatar_url"),
   isAdmin: boolean("is_admin").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 })
