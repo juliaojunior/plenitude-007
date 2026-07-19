@@ -52,8 +52,10 @@ export async function GET(request: Request) {
   return new ImageResponse(
     (
       <div style={{ position: "relative", width: 506, height: 912, display: "flex" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element -- next/image não roda dentro de ImageResponse/Satori, precisa de <img> puro */}
         <img
           src={bgSrc}
+          alt=""
           width={506}
           height={912}
           style={{ position: "absolute", top: 0, left: 0 }}

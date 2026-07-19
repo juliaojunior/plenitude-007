@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { CategoriasCarrossel } from "@/components/categorias-carrossel"
 import { ManaAudioButton } from "@/components/mana-audio-button"
+import { ManaShareButton } from "@/components/mana-share-button"
 import { SonsCarrossel } from "@/components/sons-carrossel"
 import { SeriesGrid } from "@/components/series-grid"
 import { todayString } from "@/lib/utils"
@@ -64,8 +65,13 @@ export default async function HomePage() {
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--gold)]">
             Maná Diário
           </p>
-          {mana?.urlAudio && (
-            <ManaAudioButton src={mana.urlAudio} titulo={mana.referencia ?? "Maná Diário"} />
+          {mana && (
+            <div className="flex items-center gap-1">
+              {mana.urlAudio && (
+                <ManaAudioButton src={mana.urlAudio} titulo={mana.referencia ?? "Maná Diário"} />
+              )}
+              <ManaShareButton data={mana.data} referencia={mana.referencia ?? "Maná Diário"} />
+            </div>
           )}
         </div>
         {mana ? (
