@@ -15,6 +15,9 @@ export interface ManaEntry {
   referencia: string
   textoBiblico: string
   comentario: string
+  roteiroAudio?: string
+  urlAudio?: string | null
+  duracaoSegundos?: number | null
 }
 
 export interface MeditacaoEntry {
