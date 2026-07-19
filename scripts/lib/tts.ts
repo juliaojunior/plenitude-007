@@ -25,8 +25,8 @@ export function chunk(text: string): string[] {
   return out
 }
 
-async function ttsOne(text: string): Promise<Buffer> {
-  const voice = process.env.ELEVENLABS_VOICE_ID!
+async function ttsOne(text: string, voiceId?: string): Promise<Buffer> {
+  const voice = voiceId ?? process.env.ELEVENLABS_VOICE_ID!
   const model = process.env.ELEVENLABS_MODEL ?? "eleven_v3"
   const body: Record<string, unknown> = { text, model_id: model }
   if (model !== "eleven_v3") {
@@ -41,13 +41,13 @@ async function ttsOne(text: string): Promise<Buffer> {
   return Buffer.from(await res.arrayBuffer())
 }
 
-export async function tts(text: string): Promise<Buffer> {
+export async function tts(text: string, voiceId?: string): Promise<Buffer> {
   const parts = chunk(text)
-  if (parts.length === 1) return ttsOne(parts[0])
+  if (parts.length === 1) return ttsOne(parts[0], voiceId)
   const bufs: Buffer[] = []
   for (let i = 0; i < parts.length; i++) {
     console.log(`    · bloco ${i + 1}/${parts.length} (${parts[i].length} chars)`)
-    bufs.push(await ttsOne(parts[i]))
+    bufs.push(await ttsOne(parts[i], voiceId))
   }
   return Buffer.concat(bufs)
 }
