@@ -4,6 +4,9 @@ import { Children, cloneElement, isValidElement, useLayoutEffect, useRef } from 
 import type { ReactElement, ReactNode } from "react"
 
 const SPEED_PX_PER_SECOND = 24
+// Total pointer movement, in px, above which a pointerdown+up is treated as
+// a drag (suppressing the Link's click/navigation) rather than a tap.
+const DRAG_CLICK_THRESHOLD_PX = 10
 
 /**
  * Horizontal auto-advancing carousel with a seamless infinite loop.
@@ -32,8 +35,24 @@ const SPEED_PX_PER_SECOND = 24
  * Auto-advance moves by elapsed time (not a fixed per-frame pixel step) so
  * it isn't lost to the browser's scroll-position rounding, and is skipped
  * entirely under prefers-reduced-motion. It pauses while the user is
- * actively touching/dragging; manual scroll always works and wraps the same
- * way via the scroll listener.
+ * actively dragging; manual scroll always works and wraps the same way via
+ * the scroll listener.
+ *
+ * Dragging is implemented manually via Pointer Events rather than relying on
+ * native scroll-by-drag: click-and-drag with a mouse was never native scroll
+ * behavior to begin with (only wheel/scrollbar move an `overflow-x-auto`
+ * element), and on touch the native pan gesture competed with the
+ * auto-advance loop writing `scrollLeft` 60x/second. `pointerdown` captures
+ * the pointer (`setPointerCapture`) so `pointermove`/`pointerup` keep firing
+ * on this element even if the pointer leaves its bounds mid-drag, and writes
+ * `scrollLeft` directly from the pointer delta — this still fires the
+ * `scroll` listener above, so wrap-around needs no special-casing. `touch-action:
+ * pan-y` on the container lets the browser keep handling vertical page
+ * scroll natively while horizontal panning is fully handed to this handler.
+ * Items are `<Link>`s, so a tap must still navigate: a running click/drag
+ * distinction (via total pointer movement since `pointerdown`) suppresses
+ * the resulting `click` — and therefore the navigation — only once movement
+ * exceeds `DRAG_CLICK_THRESHOLD_PX`.
  */
 type FocusableProps = { "aria-hidden"?: boolean; tabIndex?: number }
 
@@ -53,6 +72,10 @@ export function Carousel({ children }: { children: React.ReactNode }) {
   const firstSetRef = useRef<HTMLDivElement>(null)
   const secondSetRef = useRef<HTMLDivElement>(null)
   const pausedRef = useRef(false)
+  const draggingRef = useRef(false)
+  const dragStartXRef = useRef(0)
+  const dragStartScrollLeftRef = useRef(0)
+  const dragDistanceRef = useRef(0)
 
   useLayoutEffect(() => {
     const scroller = scrollerRef.current
@@ -105,15 +128,56 @@ export function Carousel({ children }: { children: React.ReactNode }) {
   const pause = () => { pausedRef.current = true }
   const resume = () => { pausedRef.current = false }
 
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    const scroller = scrollerRef.current
+    if (!scroller) return
+    scroller.setPointerCapture(event.pointerId)
+    draggingRef.current = true
+    dragStartXRef.current = event.clientX
+    dragStartScrollLeftRef.current = scroller.scrollLeft
+    dragDistanceRef.current = 0
+    pause()
+    scroller.style.cursor = "grabbing"
+    document.body.style.userSelect = "none"
+  }
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!draggingRef.current) return
+    const scroller = scrollerRef.current
+    if (!scroller) return
+    const delta = event.clientX - dragStartXRef.current
+    dragDistanceRef.current = Math.max(dragDistanceRef.current, Math.abs(delta))
+    scroller.scrollLeft = dragStartScrollLeftRef.current - delta
+  }
+
+  const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    const scroller = scrollerRef.current
+    if (scroller?.hasPointerCapture(event.pointerId)) scroller.releasePointerCapture(event.pointerId)
+    if (scroller) scroller.style.cursor = ""
+    document.body.style.userSelect = ""
+    draggingRef.current = false
+    resume()
+  }
+
+  // A tap must still navigate the underlying <Link>; only suppress the click
+  // (and thus navigation) once the pointer actually moved past the drag
+  // threshold since pointerdown.
+  const handleClickCapture = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (dragDistanceRef.current > DRAG_CLICK_THRESHOLD_PX) {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+  }
+
   return (
     <div
       ref={scrollerRef}
-      onPointerDown={pause}
-      onPointerUp={resume}
-      onPointerLeave={resume}
-      onTouchStart={pause}
-      onTouchEnd={resume}
-      className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      onClickCapture={handleClickCapture}
+      className="flex gap-4 overflow-x-auto pb-2 touch-pan-y cursor-grab [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       <div ref={firstSetRef} className="flex shrink-0 gap-4">{children}</div>
       <div ref={secondSetRef} className="flex shrink-0 gap-4">{forDuplicateCopy(children)}</div>
