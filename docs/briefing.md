@@ -227,4 +227,4 @@ Diferente das meditações e séries (conteúdo fechado, geradas em lote único)
 
 **UI:** botão discreto de play/pause no Maná Diário da home (`src/components/mana-audio-button.tsx`, client component). Ícone de fone de ouvido no canto superior direito da seção, ao lado do label "Maná Diário" — sem barra de progresso, só alterna entre `Headphones` e `Pause` (lucide) tocando um `<audio>` inline, sem navegar pra outra tela. Só renderiza se `mana.urlAudio` existir no banco, então fica invisível até o `content:seed` rodar.
 
-**Pendente:** `content:seed` ainda não rodou — banco compartilhado, aguardando decisão do usuário de quando publicar (só depois disso o ícone de áudio aparece de fato na home em produção).
+**Publicado:** `npm run content:seed` rodado após aprovação do usuário — 60 Manás com `url_audio`/`duracao_segundos` reais confirmados por query direta no banco (também reafirmou meditações/sons/séries, sem alteração de conteúdo neles). Ícone de áudio na seção "Maná Diário" (canto superior direito, ao lado do label dourado) deve aparecer agora em `/home` — verificação visual final feita pelo próprio usuário.
