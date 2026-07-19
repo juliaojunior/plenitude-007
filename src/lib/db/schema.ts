@@ -62,6 +62,8 @@ export const manadiario = pgTable("mana_diario", {
   textoBiblico: text("texto_biblico").notNull(),
   referencia: text("referencia"),
   comentario: text("comentario"),
+  urlAudio: text("url_audio"),
+  duracaoSegundos: integer("duracao_segundos"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 })

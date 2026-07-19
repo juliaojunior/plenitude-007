@@ -30,9 +30,15 @@ async function main() {
       textoBiblico: m.textoBiblico,
       referencia: m.referencia,
       comentario: m.comentario,
+      urlAudio: m.urlAudio ?? null,
+      duracaoSegundos: m.duracaoSegundos ?? null,
     }).onConflictDoUpdate({
       target: manadiario.data,
-      set: { textoBiblico: m.textoBiblico, referencia: m.referencia, comentario: m.comentario, updatedAt: new Date() },
+      set: {
+        textoBiblico: m.textoBiblico, referencia: m.referencia, comentario: m.comentario,
+        urlAudio: m.urlAudio ?? null, duracaoSegundos: m.duracaoSegundos ?? null,
+        updatedAt: new Date(),
+      },
     })
   }
   console.log(`✓ Maná: ${mana.length} upserts`)
