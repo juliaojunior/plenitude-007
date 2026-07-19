@@ -248,3 +248,21 @@ Botão de compartilhar ao lado do ícone de áudio, na mesma seção "Maná Diá
 **Componente de compartilhar — `src/components/mana-share-button.tsx`:** busca a imagem gerada, usa `navigator.share` com o arquivo (WhatsApp aparece na folha nativa do celular) quando `navigator.canShare` suporta arquivos; em desktop/navegadores sem suporte, baixa a imagem via link `<a download>`.
 
 **Pendente:** teste do fluxo completo de compartilhamento em celular real — Web Share API não é testável via curl/CI, precisa de navegador móvel. Usuário testa pessoalmente antes do merge.
+
+## Fix — Arrastar manual nos carrosséis (mouse e toque) (2026-07-19)
+
+**Branch:** `fix/carrossel-arrastar-manual` (a partir de `main`) — mesclada em `main` neste sprint.
+
+**Causa raiz:** o carrossel dependia 100% de scroll nativo do navegador (`overflow-x-auto`). "Clicar e arrastar" com o botão do mouse nunca é scroll nativo em nenhum navegador — só toque, trackpad de dois dedos ou rodinha funcionam nativamente, então esse gesto nunca esteve implementado no computador. No celular, o auto-avanço (que escreve `scrollLeft` a cada frame via `requestAnimationFrame`) disputava com o scroll nativo por toque, mascarando o gesto do usuário.
+
+**Fix, só em `src/components/carousel.tsx`:** arrastar passou a ser controlado via Pointer Events (funciona igual para mouse/toque/caneta), sem depender mais do scroll nativo do navegador:
+- `pointerdown`: `setPointerCapture`, grava posição X e `scrollLeft` iniciais, pausa o auto-avanço, aplica `cursor: grabbing` e `user-select: none` no body.
+- `pointermove` (só durante arrasto): `scrollLeft = scrollLeftInicial - delta` — continua acionando o `onScroll` de wrap-around já existente, sem alterá-lo.
+- `pointerup`/`pointercancel`: libera a captura, restaura cursor/seleção, retoma o auto-avanço.
+- Distinção clique vs. arrasto: `onClickCapture` no container suprime a navegação do `<Link>` só se o movimento acumulado passou de 10px (`DRAG_CLICK_THRESHOLD_PX`) — um toque/clique rápido sem esse deslocamento ainda navega normalmente.
+- `touch-action: pan-y` no container: libera scroll vertical nativo da página, deixando o eixo horizontal só para o JS.
+- Handlers antigos `onTouchStart`/`onTouchEnd`/`onPointerLeave` removidos (redundantes agora que `setPointerCapture` garante que o `pointerup` chega no elemento certo).
+
+**Intocado (de propósito):** cálculo de período (`getBoundingClientRect`), wrap-around no `onScroll`, duplicação em 3 cópias, `aria-hidden`/`tabIndex` das cópias — lógica de loop infinito/acessibilidade das correções de 14/07, sem alteração.
+
+**Verificação:** `tsc --noEmit` limpo, `lint` limpo, `build` completo. Testado no preview da Vercel pelo usuário: arrastar com mouse funciona, arrastar por toque funciona, e um toque/clique rápido sem arrastar ainda abre a categoria/som normalmente (ponto mais delicado do fix, confirmado explicitamente).
