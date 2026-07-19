@@ -14,6 +14,7 @@
     "content:validate": "tsx scripts/validate-content.ts",
     "content:audio": "tsx scripts/generate-audio.ts",
     "content:audio-series": "tsx scripts/generate-audio-series.ts",
+    "content:audio-mana": "tsx scripts/generate-mana-audio.ts",
     "content:sons": "tsx scripts/generate-sons.ts",
     "content:seed": "tsx scripts/seed-content.ts"
   },
