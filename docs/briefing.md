@@ -223,4 +223,6 @@ Diferente das meditações e séries (conteúdo fechado, geradas em lote único)
 - https://hfhfrda6ggx58ctr.public.blob.vercel-storage.com/audio/mana-2026-06-28.mp3
 - https://hfhfrda6ggx58ctr.public.blob.vercel-storage.com/audio/mana-2026-06-29.mp3
 
-**Pendente:** usuário ouvir as 3 amostras e aprovar voz/ritmo/pausas antes de rodar o restante dos ~57 Manás. `content:seed` ainda não rodou — banco compartilhado, aguardando aprovação final do lote completo. Botão de áudio na home (`ManaAudioButton`) ainda não implementado — fica pra depois da aprovação.
+**Amostras aprovadas pelo usuário** — rodado o restante: **57/57 narrações geradas com sucesso, 0 falhas, sem retry**. Total de caracteres enviados à API nesta rodada: 106.028 (mais os 5.141 do lote de teste = 111.169 no total pros 60 Manás). `npm run content:validate` confirma os 60 Manás com texto íntegro; conferido também que as 60 entradas têm `urlAudio` preenchido.
+
+**Pendente:** `content:seed` ainda não rodou — banco compartilhado, aguardando decisão do usuário de quando publicar. Botão de áudio na home (`ManaAudioButton`) implementado nesta mesma sessão, ver próxima seção.
