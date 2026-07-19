@@ -2,6 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { CategoriasCarrossel } from "@/components/categorias-carrossel"
+import { ManaAudioButton } from "@/components/mana-audio-button"
 import { SonsCarrossel } from "@/components/sons-carrossel"
 import { SeriesGrid } from "@/components/series-grid"
 import { todayString } from "@/lib/utils"
@@ -59,9 +60,14 @@ export default async function HomePage() {
 
       {/* Maná Diário — The Signature Element */}
       <section className="mb-8 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6">
-        <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--gold)]">
-          Maná Diário
-        </p>
+        <div className="mb-4 flex items-center justify-between">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--gold)]">
+            Maná Diário
+          </p>
+          {mana?.urlAudio && (
+            <ManaAudioButton src={mana.urlAudio} titulo={mana.referencia ?? "Maná Diário"} />
+          )}
+        </div>
         {mana ? (
           <>
             <blockquote className="sacred-text mb-3">
