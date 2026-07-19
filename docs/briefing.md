@@ -201,3 +201,26 @@ As 55 meditações exclusivas de série (`content/series-itens.json`) usavam um 
 ## Publicação da narração das séries + merge em main (2026-07-15)
 
 `content:seed` rodado após aprovação do usuário: 44/44 meditações de série com `urlAudio`/`duracaoSegundos` reais confirmados por query direta no banco (as 11 de Compaixão/Primeiros passos permanecem com o placeholder, sem alteração). Branch `content/audio-series-elevenlabs` mesclada em `main` (merge normal, sem squash) via commit `b9790f1`, build limpo, push feito e deploy de produção confirmado `READY` em `refugio.muitomelhor.net`.
+
+## Narração do Maná Diário — script reutilizável via ElevenLabs (2026-07-18)
+
+**Branch:** `feat/audio-mana-diario` (a partir de `main`, sem merge).
+
+Diferente das meditações e séries (conteúdo fechado, geradas em lote único), o Maná Diário é criado continuamente pelo usuário em lotes de 60 dias — então em vez de um script de lote único, foi construído um **script reutilizável e idempotente**: `scripts/generate-mana-audio.ts` (`npm run content:audio-mana`). Ele lê `content/mana.json`, filtra só as entradas sem `urlAudio`, gera `roteiroAudio` pra elas se ainda não tiver, chama a TTS, sobe pro Vercel Blob e grava `urlAudio`/`duracaoSegundos` — salvando o JSON a cada item processado, então nunca perde progresso e nunca regera o que já tem áudio real.
+
+**Como reutilizar em lotes futuros:** rodar `npm run content:audio-mana` sem argumentos narra tudo que estiver pendente. Aceita `--limit N` (só os N primeiros pendentes, útil pra lotes de teste) e um dia específico via `YYYY-MM-DD` como argumento posicional.
+
+**Voz:** `EIkHVdkuarjkYUyMnoes` — diferente da voz das meditações/séries (`ELEVENLABS_VOICE_ID` no `.env.local`), de propósito. Para permitir isso sem duplicar o helper de TTS, `scripts/lib/tts.ts` ganhou um parâmetro opcional `voiceId` em `tts()`/`ttsOne()` (default: o env var global, então as chamadas existentes de meditações/séries não mudam).
+
+**Roteiro fixo (não heurístico):** diferente das meditações, o Maná sempre segue a mesma estrutura (texto bíblico → referência → comentário), então o roteiro é montado programaticamente, sem heurística por parágrafo: `[slowly] {textoBiblico} <break time="1.2s" /> [softly] {referencia} <break time="1.5s" /> [gently] {comentário com <break time="0.6s" /> entre frases}`. Confirmado que as tags de emoção/pausa funcionam igual com `eleven_v3` independente da voz.
+
+**Schema:** colunas `urlAudio`/`duracaoSegundos` adicionadas em `mana_diario` (mesmo padrão de `meditacoes`), sincronizadas via `npm run db:push` (projeto não usa migrations geradas, só push direto). `seed-content.ts` atualizado pra incluir os dois campos no upsert do Maná.
+
+**Cota ElevenLabs:** mesma limitação já registrada — a chave não tem escopo `user_read`, não dá pra checar cota via API. O script reporta o total de caracteres enviados.
+
+**Lote de teste gerado:** 3 primeiros Manás (2026-06-27, 2026-06-28, 2026-06-29), 5.141 caracteres enviados, 3/3 sucesso sem retry, durações entre 103s e 111s. Amostras em:
+- https://hfhfrda6ggx58ctr.public.blob.vercel-storage.com/audio/mana-2026-06-27.mp3
+- https://hfhfrda6ggx58ctr.public.blob.vercel-storage.com/audio/mana-2026-06-28.mp3
+- https://hfhfrda6ggx58ctr.public.blob.vercel-storage.com/audio/mana-2026-06-29.mp3
+
+**Pendente:** usuário ouvir as 3 amostras e aprovar voz/ritmo/pausas antes de rodar o restante dos ~57 Manás. `content:seed` ainda não rodou — banco compartilhado, aguardando aprovação final do lote completo. Botão de áudio na home (`ManaAudioButton`) ainda não implementado — fica pra depois da aprovação.
