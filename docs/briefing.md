@@ -228,3 +228,23 @@ Diferente das meditações e séries (conteúdo fechado, geradas em lote único)
 **UI:** botão discreto de play/pause no Maná Diário da home (`src/components/mana-audio-button.tsx`, client component). Ícone de fone de ouvido no canto superior direito da seção, ao lado do label "Maná Diário" — sem barra de progresso, só alterna entre `Headphones` e `Pause` (lucide) tocando um `<audio>` inline, sem navegar pra outra tela. Só renderiza se `mana.urlAudio` existir no banco, então fica invisível até o `content:seed` rodar.
 
 **Publicado:** `npm run content:seed` rodado após aprovação do usuário — 60 Manás com `url_audio`/`duracao_segundos` reais confirmados por query direta no banco (também reafirmou meditações/sons/séries, sem alteração de conteúdo neles). Ícone de áudio na seção "Maná Diário" (canto superior direito, ao lado do label dourado) deve aparecer agora em `/home` — verificação visual final feita pelo próprio usuário.
+
+## Compartilhamento do Maná Diário via WhatsApp (2026-07-18)
+
+**Branch:** `feat/compartilhar-mana-whatsapp` (a partir de `main`, sem merge).
+
+Botão de compartilhar ao lado do ícone de áudio, na mesma seção "Maná Diário" da home. Gera um cartão de imagem (506×912, formato story) sob demanda e abre a folha nativa de compartilhamento do celular — WhatsApp é uma das opções, junto com os outros apps do sistema.
+
+**Geração da imagem — `src/app/api/mana-card/route.tsx`:** usa `ImageResponse` de `next/og` (embutido no Next.js, runtime Node, zero dependência nova). Compõe o template em branco fornecido pelo usuário (`public/cardRefugio_02.png`) com o texto do Maná do dia: saudação (Bom dia/Boa tarde/Boa noite conforme horário, mesma lógica já usada na home), referência, versículo e uma reflexão curta (só a primeira frase do `comentario`, não o texto completo — não cabe no espaço fixo do template). Fonte Cormorant Garamond (mesma já usada no app pro texto bíblico) — arquivos `.ttf` baixados do Google Fonts e commitados em `src/assets/fonts/cormorant-garamond/`, já que `next/og` precisa dos bytes crus da fonte (não integra com `next/font`).
+
+**Descoberta durante a implementação — `src/proxy.ts`:** o AGENTS.md avisa que esta versão do Next tem convenções diferentes; confirmado na prática — o middleware do Clerk não é `middleware.ts` (não existe esse arquivo), é `src/proxy.ts` (renomeado nesta versão). A spec original assumia erroneamente que a rota seria pública por não achar um `middleware.ts`; na real ela é protegida por padrão (como todo o resto do app), o que é o comportamento certo aqui — só usuário logado aciona o botão, e quem recebe a imagem via WhatsApp recebe os bytes do PNG, não um link.
+
+**Bug de layout descoberto e corrigido:** Satori (o motor por trás do `ImageResponse`) exige `display: flex/contents/none` explícito em qualquer elemento com mais de um filho — misturar `{expressão}` com texto literal no mesmo elemento (ex.: `{saudacao()}, CORAÇÃO!`) conta como múltiplos filhos e quebra a renderização. Corrigido consolidando em template literals (`` {`${saudacao()}, CORAÇÃO!`} ``).
+
+**Overflow de texto:** o versículo mais longo dos 60 Manás (264 caracteres) estourava a caixa de altura fixa do template quando renderizado no mesmo tamanho de fonte dos demais. Resolvido com 3 níveis de tamanho de fonte por comprimento do versículo (≤110/≤170/>170 chars), escondendo a reflexão curta no nível mais alto pra abrir espaço — nunca corta o texto bíblico. Testado contra o mais curto, a mediana, o p90 e os 4 outliers reais do `content/mana.json`, todos renderizando corretamente.
+
+**Verificação:** como a rota exige autenticação (Clerk), não deu pra testar via `curl` puro — a lógica de renderização foi validada rodando o mesmo código via um script standalone (`tsx`, bypassando HTTP/auth), com a imagem final inspecionada visualmente pra várias datas. `npx tsc --noEmit` e `npm run lint` limpos (só o warning pré-existente não relacionado), `npm run build` completo com sucesso e `/api/mana-card` listada nas rotas.
+
+**Componente de compartilhar — `src/components/mana-share-button.tsx`:** busca a imagem gerada, usa `navigator.share` com o arquivo (WhatsApp aparece na folha nativa do celular) quando `navigator.canShare` suporta arquivos; em desktop/navegadores sem suporte, baixa a imagem via link `<a download>`.
+
+**Pendente:** teste do fluxo completo de compartilhamento em celular real — Web Share API não é testável via curl/CI, precisa de navegador móvel. Usuário testa pessoalmente antes do merge.
