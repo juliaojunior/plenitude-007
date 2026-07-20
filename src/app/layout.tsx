@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import { Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google"
 import { ClerkProvider } from "@clerk/nextjs"
+import { Analytics } from "@vercel/analytics/next"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AnimatedBackground } from "@/components/animated-background"
 import "./globals.css"
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </ThemeProvider>
         </ClerkProvider>
+        <Analytics />
       </body>
     </html>
   )
